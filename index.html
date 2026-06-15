@@ -1,0 +1,3769 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Medical Map Master OS</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --ink: #172033;
+      --muted: #657188;
+      --line: #d9e1ee;
+      --blue: #2563eb;
+      --cyan: #0891b2;
+      --green: #15966b;
+      --red: #dc3f4d;
+      --amber: #b7791f;
+      --violet: #7556d9;
+      --shadow: 0 16px 40px rgba(26, 39, 66, .12);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, rgba(37, 99, 235, .07) 1px, transparent 1px),
+        linear-gradient(rgba(37, 99, 235, .06) 1px, transparent 1px),
+        var(--bg);
+      background-size: 34px 34px;
+      font-family: Inter, "Noto Sans TC", "Microsoft JhengHei", system-ui, -apple-system, sans-serif;
+    }
+
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 22px 18px;
+      background: #101827;
+      color: #f8fbff;
+      border-right: 1px solid rgba(255,255,255,.08);
+      overflow: auto;
+    }
+
+    .brand {
+      display: grid;
+      gap: 8px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+    }
+
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #22d3ee, #2563eb 55%, #16a34a);
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .brand p {
+      margin: 0;
+      color: #b9c5d8;
+      line-height: 1.55;
+      font-size: 13px;
+    }
+
+    .nav-label {
+      margin: 20px 0 8px;
+      color: #9fb0c8;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .nav-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .nav-btn {
+      width: 100%;
+      min-height: 42px;
+      padding: 8px 10px;
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      align-items: center;
+      gap: 8px;
+      color: #e8eef8;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      text-align: left;
+    }
+
+    .nav-btn:hover, .nav-btn.active {
+      background: rgba(255,255,255,.08);
+      border-color: rgba(255,255,255,.14);
+    }
+
+    .nav-btn .num {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 7px;
+      background: rgba(255,255,255,.12);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .nav-btn.active .num { background: #22d3ee; color: #082032; }
+
+    .main {
+      min-width: 0;
+      padding: 28px;
+    }
+
+    .hero {
+      min-height: 430px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(320px, .9fr);
+      gap: 24px;
+      align-items: stretch;
+      margin-bottom: 22px;
+    }
+
+    .hero-copy {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: clamp(28px, 5vw, 58px);
+      border-radius: var(--radius);
+      color: white;
+      background:
+        linear-gradient(120deg, rgba(10, 18, 32, .92), rgba(13, 49, 82, .78)),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='620' viewBox='0 0 900 620'%3E%3Crect width='900' height='620' fill='%23111b2d'/%3E%3Cg fill='none' stroke='%2322d3ee' stroke-opacity='.5'%3E%3Cpath d='M110 150 C210 80 290 250 390 160 S570 90 720 170' stroke-width='5'/%3E%3Cpath d='M130 355 C270 250 300 430 430 330 S630 220 760 350' stroke-width='4'/%3E%3Cpath d='M205 485 C300 420 385 520 475 455 S650 395 745 475' stroke-width='3'/%3E%3C/g%3E%3Cg fill='%23ffffff' fill-opacity='.08'%3E%3Ccircle cx='135' cy='150' r='58'/%3E%3Ccircle cx='725' cy='171' r='78'/%3E%3Ccircle cx='426' cy='331' r='68'/%3E%3Ccircle cx='748' cy='475' r='54'/%3E%3C/g%3E%3Cg stroke='%23ffffff' stroke-opacity='.28'%3E%3Cpath d='M450 78v470M215 95v390M670 120v390M80 305h740'/%3E%3C/g%3E%3C/svg%3E");
+      background-size: cover;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .kicker {
+      margin: 0 0 14px;
+      width: max-content;
+      max-width: 100%;
+      padding: 7px 10px;
+      border: 1px solid rgba(255,255,255,.26);
+      border-radius: 999px;
+      color: #caf5ff;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .hero h2 {
+      margin: 0;
+      max-width: 820px;
+      font-size: clamp(38px, 6vw, 76px);
+      line-height: .96;
+      letter-spacing: 0;
+    }
+
+    .hero-copy p {
+      max-width: 660px;
+      margin: 18px 0 0;
+      color: #dbeafe;
+      font-size: 18px;
+      line-height: 1.7;
+    }
+
+    .formula {
+      margin-top: 26px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .chip {
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.14);
+      color: #f6fbff;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .plus { color: #93e8ff; font-weight: 900; }
+
+    .mission {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 16px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.88);
+      box-shadow: var(--shadow);
+    }
+
+    .mission h3, .panel h3, .section-title h3 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      min-height: 95px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #f9fbff;
+    }
+
+    .metric b {
+      display: block;
+      font-size: 28px;
+      line-height: 1;
+      color: var(--blue);
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .progress-wrap {
+      display: grid;
+      gap: 8px;
+    }
+
+    .bar {
+      height: 12px;
+      border-radius: 999px;
+      background: #e8eef7;
+      overflow: hidden;
+    }
+
+    .bar i {
+      display: block;
+      width: 68%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), var(--cyan), var(--blue));
+    }
+
+    .module-strip {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(112px, 1fr));
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .module {
+      min-height: 104px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: 0 8px 20px rgba(26, 39, 66, .07);
+    }
+
+    .module strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .module span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 14px;
+      margin: 4px 0 12px;
+    }
+
+    .section-title p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .map-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .map-card {
+      min-height: 184px;
+      padding: 16px;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: 0 8px 18px rgba(26, 39, 66, .06);
+      text-align: left;
+    }
+
+    .map-card:hover, .map-card.selected {
+      border-color: rgba(37, 99, 235, .65);
+      box-shadow: 0 14px 28px rgba(37, 99, 235, .14);
+      transform: translateY(-1px);
+    }
+
+    .map-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .badge {
+      min-width: 34px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      padding: 0 8px;
+      border-radius: 7px;
+      color: white;
+      background: var(--blue);
+      font-weight: 900;
+      font-size: 13px;
+    }
+
+    .domain {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .map-card h4 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .question {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .mini-flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-content: start;
+    }
+
+    .mini-flow span {
+      padding: 5px 7px;
+      border-radius: 999px;
+      background: #edf4ff;
+      color: #264569;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .output {
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .right-rail {
+      position: sticky;
+      top: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .panel {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 10px 24px rgba(26, 39, 66, .08);
+    }
+
+    .detail-head {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .detail-head h3 { font-size: 22px; }
+    .detail-head p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .node-map {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .node {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 9px;
+      align-items: center;
+      padding: 9px;
+      border: 1px solid #dfe7f3;
+      border-radius: 8px;
+      background: #fbfdff;
+      color: #31415b;
+      font-size: 14px;
+    }
+
+    .dot {
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: white;
+      background: var(--cyan);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin: 14px 0;
+    }
+
+    .tab {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fbff;
+      color: #42516a;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .tab.active {
+      color: white;
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .ai-box {
+      display: grid;
+      gap: 10px;
+    }
+
+    .ai-box textarea {
+      width: 100%;
+      min-height: 94px;
+      padding: 12px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: #fbfdff;
+      line-height: 1.5;
+    }
+
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr 42px;
+      gap: 8px;
+    }
+
+    .primary {
+      min-height: 42px;
+      border: 0;
+      border-radius: 8px;
+      color: white;
+      background: var(--blue);
+      font-weight: 900;
+    }
+
+    .icon-btn {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--blue);
+      background: white;
+      font-weight: 900;
+    }
+
+    .result {
+      min-height: 160px;
+      padding: 13px;
+      border-radius: 8px;
+      background: #101827;
+      color: #e5f2ff;
+      font-size: 13px;
+      line-height: 1.65;
+      white-space: pre-line;
+    }
+
+    .memory-modes {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .memory-modes label {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      min-height: 36px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: #34435b;
+      background: #fbfdff;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .exam-ladder {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .exam-ladder button {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+      color: #34435b;
+      font-weight: 800;
+    }
+
+    .exam-ladder button.hot {
+      color: #fff;
+      background: var(--red);
+      border-color: var(--red);
+    }
+
+    .battle {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .battle-row {
+      display: grid;
+      grid-template-columns: 86px 1fr 44px;
+      gap: 8px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .battle-row .bar { height: 9px; }
+    .battle-row:nth-child(1) i { width: 76%; background: var(--green); }
+    .battle-row:nth-child(2) i { width: 64%; background: var(--blue); }
+    .battle-row:nth-child(3) i { width: 51%; background: var(--amber); }
+    .battle-row:nth-child(4) i { width: 38%; background: var(--red); }
+
+    .mastery-board,
+    .matrix-zone,
+    .loop-zone {
+      margin-top: 24px;
+    }
+
+    .model-lab {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr);
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .deep-panel,
+    .table-panel {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.94);
+      box-shadow: 0 10px 24px rgba(26, 39, 66, .08);
+    }
+
+    .deep-panel h3,
+    .table-panel h3 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .deep-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .deep-card {
+      min-height: 112px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+    }
+
+    .deep-card strong {
+      display: block;
+      margin-bottom: 8px;
+      color: #26364f;
+    }
+
+    .deep-card p,
+    .deep-card li {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .deep-card ul {
+      margin: 0;
+      padding-left: 17px;
+    }
+
+    .expanded-content {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .content-section {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .content-section h4 {
+      margin: 0 0 10px;
+      color: #172033;
+      font-size: 15px;
+    }
+
+    .content-section p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .content-list,
+    .content-columns ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .content-list li + li,
+    .content-columns li + li {
+      margin-top: 5px;
+    }
+
+    .content-columns {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .content-columns strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #26364f;
+      font-size: 13px;
+    }
+
+    .chain {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      align-items: center;
+    }
+
+    .chain span {
+      padding: 7px 9px;
+      border-radius: 999px;
+      background: #edf4ff;
+      color: #26364f;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .prompt-card {
+      padding: 12px;
+      border-radius: 8px;
+      background: #101827;
+      color: #e5f2ff;
+      font-size: 13px;
+      line-height: 1.65;
+      white-space: pre-line;
+    }
+
+    .node-expansion-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .node-expansion-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+      overflow: hidden;
+    }
+
+    .node-expansion-card h5 {
+      margin: 0;
+      padding: 11px 12px;
+      color: #172033;
+      background: #eef5ff;
+      font-size: 14px;
+    }
+
+    .node-expansion-card dl {
+      display: grid;
+      gap: 0;
+      margin: 0;
+      padding: 0;
+    }
+
+    .node-expansion-card div {
+      display: grid;
+      grid-template-columns: 76px 1fr;
+      gap: 8px;
+      padding: 9px 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    .node-expansion-card dt {
+      color: #26364f;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .node-expansion-card dd {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .max-task-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .max-task-card {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+    }
+
+    .max-task-card strong {
+      display: block;
+      margin-bottom: 7px;
+      color: #26364f;
+      font-size: 13px;
+    }
+
+    .max-task-card ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .path {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(74px, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .path-step {
+      min-height: 76px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+      text-align: center;
+      display: grid;
+      align-content: center;
+      gap: 6px;
+    }
+
+    .path-step b {
+      color: var(--blue);
+      font-size: 13px;
+    }
+
+    .path-step span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .mastery-checks {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .mastery-checks label {
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 9px;
+      align-items: start;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+      color: #34435b;
+      font-size: 13px;
+      line-height: 1.45;
+      font-weight: 700;
+    }
+
+    .mastery-meter {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .mastery-score {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+      font-size: 13px;
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      line-height: 1.45;
+    }
+
+    .data-table th {
+      background: #eef5ff;
+      color: #26364f;
+      font-size: 12px;
+    }
+
+    .data-table tr:last-child td { border-bottom: 0; }
+
+    .ai-function-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .ai-function {
+      min-height: 112px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+    }
+
+    .ai-function strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #26364f;
+    }
+
+    .ai-function span,
+    .ai-function em {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      font-style: normal;
+    }
+
+    .ai-function em {
+      margin-top: 8px;
+      color: var(--green);
+      font-weight: 900;
+    }
+
+    .full-atlas {
+      display: grid;
+      gap: 16px;
+    }
+
+    .os-full-card {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255,255,255,.96);
+      box-shadow: 0 10px 24px rgba(26, 39, 66, .07);
+    }
+
+    .os-full-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 12px;
+    }
+
+    .os-full-head h4 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .os-full-head p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .os-full-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .os-stat {
+      padding: 11px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .os-stat strong {
+      display: block;
+      margin-bottom: 5px;
+      color: #26364f;
+    }
+
+    .ai-manual-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .ai-manual {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0 8px 18px rgba(26, 39, 66, .05);
+    }
+
+    .ai-manual h4 {
+      margin: 0 0 8px;
+      font-size: 17px;
+    }
+
+    .ai-manual .tagline {
+      margin: 0 0 12px;
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1.45;
+    }
+
+    .manual-block {
+      padding: 10px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .manual-block strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #26364f;
+      font-size: 13px;
+    }
+
+    .manual-block p,
+    .manual-block li {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .manual-block ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .loop-track {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+      counter-reset: loop;
+    }
+
+    .loop-step {
+      min-height: 86px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+      box-shadow: 0 8px 18px rgba(26, 39, 66, .05);
+      position: relative;
+    }
+
+    .loop-step::before {
+      counter-increment: loop;
+      content: counter(loop);
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: white;
+      background: var(--blue);
+      font-size: 12px;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .loop-step strong {
+      display: block;
+      color: #26364f;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .loop-step span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .loop-manual-grid {
+      display: grid;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .loop-manual-card {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0 8px 18px rgba(26, 39, 66, .05);
+    }
+
+    .loop-manual-head {
+      display: flex;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 12px;
+    }
+
+    .loop-index {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border-radius: 8px;
+      color: white;
+      background: var(--blue);
+      font-weight: 900;
+    }
+
+    .loop-manual-head h4 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .loop-manual-head p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .loop-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .loop-detail {
+      padding: 11px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+    }
+
+    .loop-detail strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #26364f;
+      font-size: 12px;
+    }
+
+    .loop-detail p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .toast {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      max-width: 340px;
+      padding: 13px 15px;
+      border-radius: 8px;
+      color: white;
+      background: #101827;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: .2s ease;
+      z-index: 20;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 1180px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar {
+        position: static;
+        height: auto;
+      }
+      .nav-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .hero, .workspace { grid-template-columns: 1fr; }
+      .right-rail { position: static; }
+      .module-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .model-lab { grid-template-columns: 1fr; }
+      .ai-function-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .loop-track { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .path { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .os-full-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .ai-manual-grid { grid-template-columns: 1fr; }
+      .loop-detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 760px) {
+      .main { padding: 16px; }
+      .sidebar { padding: 16px; }
+      .nav-grid, .module-strip, .map-grid, .metric-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero-copy { padding: 28px 20px; }
+      .hero h2 { font-size: 40px; }
+      .tabs { grid-template-columns: repeat(2, 1fr); }
+      .memory-modes { grid-template-columns: 1fr; }
+      .section-title { display: block; }
+      .deep-grid, .ai-function-grid, .loop-track, .path {
+        grid-template-columns: 1fr;
+      }
+      .content-columns {
+        grid-template-columns: 1fr;
+      }
+      .node-expansion-grid,
+      .max-task-grid {
+        grid-template-columns: 1fr;
+      }
+      .os-full-grid,
+      .ai-manual-grid,
+      .loop-detail-grid {
+        grid-template-columns: 1fr;
+      }
+      .os-full-head {
+        display: block;
+      }
+      .data-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+    }
+  
+    /* ── Collapsible nodes ── */
+    .node-details {
+      border: 1px solid #d1d9e8;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(26,39,66,.06);
+    }
+    .node-details[open] {
+      border-color: rgba(37,99,235,.4);
+      box-shadow: 0 6px 20px rgba(37,99,235,.12);
+    }
+    .node-sum {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      cursor: pointer;
+      list-style: none;
+      background: #f8faff;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #172033;
+      transition: background .15s;
+    }
+    .node-sum::-webkit-details-marker { display: none; }
+    .node-sum::marker { display: none; }
+    .node-details[open] .node-sum {
+      background: linear-gradient(90deg,#eef4ff,#f5f8ff);
+      border-radius: 10px 10px 0 0;
+      border-bottom: 1px solid #d1d9e8;
+    }
+    .node-sum:hover { background: #eef4ff; }
+    .sum-badge {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 20px;
+      background: rgba(37,99,235,.12);
+      color: #2563eb;
+      white-space: nowrap;
+    }
+    .sum-arr {
+      margin-left: auto;
+      color: #9fb0c8;
+      font-size: 14px;
+      transition: transform .2s;
+      flex-shrink: 0;
+    }
+    .node-details[open] .sum-arr { transform: rotate(90deg); }
+    .node-body {
+      padding: 14px 16px;
+    }
+    .nb-row {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 13px;
+      align-items: start;
+    }
+    .nb-row:last-child { border: none; }
+    .nb-row.full { grid-template-columns: 1fr; gap: 6px; }
+    .nb-row dt { font-weight: 800; color: #26364f; font-size: 12px; padding-top: 2px; }
+    .nb-row dd { margin: 0; color: #334155; line-height: 1.6; }
+    .mnem-box { background: #fefce8; border: 1px solid #fde047; border-radius: 8px; padding: 10px 14px; font-size: 13px; line-height: 1.6; }
+    .mnem-box b { color: #92400e; display: block; margin-bottom: 4px; font-size: 11px; text-transform: uppercase; }
+    .warn-box { background: #fff7ed; border: 1px solid #fb923c; border-radius: 8px; padding: 10px 14px; font-size: 13px; line-height: 1.6; }
+    .warn-box b { color: #c2410c; display: block; margin-bottom: 4px; font-size: 11px; text-transform: uppercase; }
+    .info-box { background: #f0f9ff; border: 1px solid #38bdf8; border-radius: 8px; padding: 10px 14px; font-size: 13px; line-height: 1.6; }
+    .info-box b { color: #0369a1; display: block; margin-bottom: 4px; font-size: 11px; text-transform: uppercase; }
+    .exam-pill { display: inline-block; margin: 2px 3px; padding: 4px 10px; background: #fee2e2; color: #b91c1c; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .anki-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+    .anki-c { border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden; }
+    .anki-q { background: #1e3a5f; color: #e5f2ff; padding: 8px 12px; font-size: 12px; font-weight: 700; }
+    .anki-a { background: #f8fafc; padding: 8px 12px; font-size: 12px; color: #334155; line-height: 1.5; }
+    .cmp-tbl { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 4px; }
+    .cmp-tbl th { background: #101827; color: #e5f2ff; padding: 7px 10px; text-align: left; font-weight: 700; }
+    .cmp-tbl td { padding: 7px 10px; border-bottom: 1px solid #e4ecf7; color: #334155; vertical-align: top; }
+    .cmp-tbl tr:nth-child(even) td { background: #f8fbff; }
+
+    /* ── Item-level collapsibles (inside node) ── */
+    .item-details {
+      border-bottom: 1px solid #f0f4fb;
+    }
+    .item-details:last-child { border-bottom: none; }
+    .item-details[open] { background: #fafbff; }
+    .item-sum {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 14px;
+      cursor: pointer;
+      list-style: none;
+      font-size: 13px;
+      font-weight: 700;
+      color: #26364f;
+      transition: background .12s;
+      user-select: none;
+    }
+    .item-sum::-webkit-details-marker { display: none; }
+    .item-sum::marker { display: none; }
+    .item-sum:hover { background: #eef4ff; }
+    .item-details[open] .item-sum { background: #edf3ff; }
+    .item-icon { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
+    .item-label { flex: 1; }
+    .item-arr {
+      color: #b0bcce;
+      font-size: 12px;
+      transition: transform .18s;
+      flex-shrink: 0;
+    }
+    .item-details[open] .item-arr { transform: rotate(90deg); }
+    .item-body {
+      padding: 10px 14px 12px 42px;
+      font-size: 13px;
+      color: #334155;
+      line-height: 1.65;
+    }
+    .sec-content { color: #334155; line-height: 1.65; }
+    /* node-body no more inner padding */
+    .node-body { padding: 0; }
+    
+    /* ── AI center collapsible items ── */
+    #aiManualGrid { display: flex; flex-direction: column; gap: 6px; }
+    .ai-item-details {
+      border: 1px solid #d1d9e8;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .ai-item-details[open] { border-color: rgba(37,99,235,.35); box-shadow: 0 4px 14px rgba(37,99,235,.09); }
+    .ai-item-sum {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      cursor: pointer;
+      list-style: none;
+      background: #f8faff;
+      font-size: 13px;
+      transition: background .13s;
+    }
+    .ai-item-sum::-webkit-details-marker { display: none; }
+    .ai-item-sum::marker { display: none; }
+    .ai-item-sum:hover { background: #eef4ff; }
+    .ai-item-details[open] .ai-item-sum { background: #eef4ff; border-bottom: 1px solid #d1d9e8; }
+    .ai-item-icon { font-size: 18px; flex-shrink: 0; }
+    .ai-item-name { font-weight: 800; color: #172033; white-space: nowrap; }
+    .ai-item-tag { color: #6a7a90; font-size: 12px; flex: 1; }
+    .ai-sum-arr { color: #b0bcce; font-size: 12px; transition: transform .18s; flex-shrink: 0; }
+    .ai-item-details[open] .ai-sum-arr { transform: rotate(90deg); }
+    .ai-item-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+    .ai-row { display: grid; grid-template-columns: 90px 1fr; gap: 10px; font-size: 13px; color: #334155; align-items: start; }
+    .ai-row-label { font-weight: 800; color: #26364f; font-size: 11px; padding-top: 2px; white-space: nowrap; }
+    .ai-concrete { background: #fefce8; border-radius: 7px; padding: 9px 12px; }
+    .ai-demo { background: #f0f9ff; border-radius: 7px; padding: 9px 12px; }
+    .ai-demo-text { font-family: monospace; font-size: 12px; color: #0369a1; line-height: 1.55; }
+    .ai-unique { background: #f5f0ff; border-radius: 7px; padding: 9px 12px; }
+    .ai-unique .ai-row-label { color: #5b21b6; }
+        /* ══ 國考模式 CSS ══ */
+    .exam-zone {
+      padding: 28px 32px;
+      background: #f8faff;
+      border-top: 2px solid #e4ecf7;
+    }
+    .exam-mode-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .emt {
+      padding: 7px 16px;
+      border-radius: 20px;
+      border: 1.5px solid #d1d9e8;
+      background: #fff;
+      color: #26364f;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .emt:hover { border-color: #2563eb; color: #2563eb; }
+    .emt.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+    .os-filter-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 14px 0 16px;
+      flex-wrap: wrap;
+    }
+    .os-filter-label { font-size: 12px; font-weight: 700; color: #6a7a90; white-space: nowrap; }
+    .os-filter-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .os-fpill {
+      padding: 4px 12px;
+      border-radius: 999px;
+      border: 1px solid #d1d9e8;
+      background: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      color: #26364f;
+      cursor: pointer;
+      transition: all .13s;
+    }
+    .os-fpill.active { background: #172033; color: #fff; border-color: #172033; }
+    .os-fpill:hover:not(.active) { border-color: #2563eb; color: #2563eb; }
+    .exam-panel { margin-top: 4px; }
+    /* Question card */
+    .qcard {
+      border: 1px solid #d9e1ee;
+      border-radius: 10px;
+      background: #fff;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .qcard-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      cursor: pointer;
+      background: #f8faff;
+      list-style: none;
+    }
+    .qcard-head::-webkit-details-marker { display: none; }
+    .qcard-head::marker { display: none; }
+    .qcard[open] .qcard-head { background: #eef4ff; border-bottom: 1px solid #d1d9e8; }
+    .qcard[open] .qcard-arr { transform: rotate(90deg); }
+    .qcard-arr { color: #b0bcce; font-size: 12px; transition: transform .18s; margin-left: auto; flex-shrink: 0; }
+    .qcard-rank { font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 999px; background: #fee2e2; color: #b91c1c; white-space: nowrap; }
+    .qcard-rank.gold { background: #fef3c7; color: #92400e; }
+    .qcard-rank.blue { background: #dbeafe; color: #1e40af; }
+    .qcard-os { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #f0f4ff; color: #2563eb; font-weight: 700; white-space: nowrap; }
+    .qcard-freq { font-size: 11px; color: #9fb0c8; white-space: nowrap; }
+    .qcard-title { font-size: 13px; font-weight: 700; color: #172033; flex: 1; }
+    .qcard-body { padding: 14px 16px; }
+    /* Options */
+    .q-opts { display: flex; flex-direction: column; gap: 7px; margin: 12px 0; }
+    .q-opt {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 9px 13px;
+      border-radius: 8px;
+      border: 1.5px solid #e4ecf7;
+      cursor: pointer;
+      font-size: 13px;
+      color: #26364f;
+      transition: all .13s;
+      background: #fbfdff;
+    }
+    .q-opt:hover { border-color: #2563eb; background: #eef4ff; }
+    .q-opt.correct { border-color: #16a34a; background: #dcfce7; color: #166534; font-weight: 700; }
+    .q-opt.wrong { border-color: #dc2626; background: #fee2e2; color: #b91c1c; }
+    .q-opt-key { width: 22px; height: 22px; border-radius: 50%; background: #e4ecf7; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; flex-shrink: 0; color: #26364f; }
+    .q-opt.correct .q-opt-key { background: #16a34a; color: #fff; }
+    .q-opt.wrong .q-opt-key { background: #dc2626; color: #fff; }
+    .q-explain {
+      display: none;
+      margin-top: 10px;
+      padding: 12px 14px;
+      background: #f0f9ff;
+      border: 1px solid #38bdf8;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #0c4a6e;
+      line-height: 1.65;
+    }
+    .q-explain.show { display: block; }
+    .q-explain .exp-os { font-size: 11px; font-weight: 800; color: #2563eb; margin-bottom: 6px; display: block; }
+    .q-explain .exp-mnem { background: #fefce8; border-left: 3px solid #fde047; padding: 8px 10px; border-radius: 0 6px 6px 0; margin-top: 8px; font-weight: 700; color: #92400e; }
+    /* Score bar */
+    .score-bar { display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: #fff; border: 1px solid #d9e1ee; border-radius: 10px; margin-bottom: 14px; }
+    .score-num { font-size: 22px; font-weight: 900; color: #2563eb; }
+    .score-prog { flex: 1; background: #e4ecf7; border-radius: 4px; height: 8px; overflow: hidden; }
+    .score-fill { height: 100%; background: linear-gradient(90deg,#2563eb,#60a5fa); border-radius: 4px; transition: width .4s; }
+    /* Mock exam header */
+    .mock-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .mock-timer { font-size: 20px; font-weight: 900; color: #b91c1c; font-family: monospace; }
+    .btn-start { padding: 9px 20px; background: #2563eb; color: #fff; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 13px; }
+    .btn-start:hover { background: #1d4ed8; }
+    .btn-submit { padding: 9px 20px; background: #16a34a; color: #fff; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 13px; }
+    /* TOP table */
+    .top-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .top-table th { background: #101827; color: #e5f2ff; padding: 9px 12px; text-align: left; font-size: 11px; font-weight: 800; letter-spacing: .5px; }
+    .top-table td { padding: 9px 12px; border-bottom: 1px solid #e4ecf7; vertical-align: top; }
+    .top-table tr:hover td { background: #f5f8ff; }
+    .top-table td:first-child { font-weight: 900; color: #b91c1c; }
+    .freq-bar { display: inline-block; height: 8px; border-radius: 4px; background: linear-gradient(90deg,#2563eb,#60a5fa); vertical-align: middle; margin-left: 6px; }
+    /* Past exam */
+    .past-year-tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+    .pyt { padding: 5px 13px; border-radius: 6px; border: 1px solid #d1d9e8; background: #fff; font-size: 12px; font-weight: 700; cursor: pointer; }
+    .pyt.active { background: #172033; color: #fff; border-color: #172033; }
+</style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">MM</div>
+        <h1>Medical Map Master OS</h1>
+        <p>把 80% 醫學知識濃縮成 12 張超級地圖，先建立模型，再掛載細節。</p>
+      </div>
+
+      <div class="nav-label">12 Super Maps</div>
+      <div class="nav-grid" id="sideNav"></div>
+    </aside>
+
+    <main class="main">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="kicker">不是背課本 APP，也不是刷題 APP</p>
+          <h2>醫學國考 12 張超級地圖 APP</h2>
+          <p>用最少時間建立最完整醫學模型，從背誦醫學升級成理解醫學。</p>
+          <div class="formula" aria-label="核心公式">
+            <span class="chip">12 張超級地圖</span>
+            <span class="plus">×</span>
+            <span class="chip">Anki 記憶</span>
+            <span class="plus">×</span>
+            <span class="chip">AI 推理</span>
+            <span class="plus">×</span>
+            <span class="chip">錯題修正</span>
+            <span class="plus">=</span>
+            <span class="chip">國考通過 + 臨床能力</span>
+          </div>
+        </div>
+
+        <div class="mission">
+          <h3>戰情中心</h3>
+          <div class="metric-grid">
+            <div class="metric"><b>12</b><span>核心地圖模型</span></div>
+            <div class="metric"><b>1000</b><span>國考高頻掛載點</span></div>
+            <div class="metric"><b>8</b><span>超級記憶模式</span></div>
+            <div class="metric"><b>AI</b><span>推理、出題、錯題分析</span></div>
+          </div>
+          <div class="progress-wrap">
+            <strong>醫學骨架建立度</strong>
+            <div class="bar"><i></i></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="module-strip" aria-label="首頁模組">
+        <div class="module"><strong>12 張超級地圖</strong><span>解剖到家醫的醫學骨架。</span></div>
+        <div class="module"><strong>AI 疾病導航</strong><span>病因到預後的疾病生成鏈。</span></div>
+        <div class="module"><strong>AI-Anki</strong><span>一鍵轉成主動回憶卡。</span></div>
+        <div class="module"><strong>國考模式</strong><span>TOP100、TOP300、TOP1000。</span></div>
+        <div class="module"><strong>PBL 模式</strong><span>用病例訓練臨床推理。</span></div>
+        <div class="module"><strong>錯題回收</strong><span>弱點自動回流地圖節點。</span></div>
+        <div class="module"><strong>戰情中心</strong><span>能力雷達與進度監控。</span></div>
+      </section>
+
+      <section class="workspace">
+        <div>
+          <div class="section-title">
+            <div>
+              <h3>12 張超級地圖</h3>
+              <p>點選任一張地圖，右側會展開核心問題、知識節點、輸出能力與 AI 學習任務。</p>
+            </div>
+          </div>
+          <div class="map-grid" id="mapGrid"></div>
+        </div>
+
+        <aside class="right-rail">
+          <div class="panel" id="detailPanel"></div>
+
+          <div class="panel">
+            <h3>AI 超級功能</h3>
+            <div class="tabs" id="aiTabs">
+              <button class="tab active" data-mode="disease">疾病地圖</button>
+              <button class="tab" data-mode="anki">AI-Anki</button>
+              <button class="tab" data-mode="case">病例推理</button>
+              <button class="tab" data-mode="mistake">錯題分析</button>
+            </div>
+            <div class="ai-box">
+              <textarea id="aiPrompt" placeholder="輸入疾病、考點或錯題，例如：糖尿病酮酸中毒、高血壓用藥、COPD 急性惡化"></textarea>
+              <div class="action-row">
+                <button class="primary" id="generateBtn">生成學習鏈</button>
+                <button class="icon-btn" id="copyBtn" title="複製">⧉</button>
+              </div>
+              <div class="result" id="aiResult"></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>超級記憶模式</h3>
+            <div class="memory-modes">
+              <label><input type="checkbox" checked> 圖片記憶</label>
+              <label><input type="checkbox" checked> 流程記憶</label>
+              <label><input type="checkbox"> 動畫記憶</label>
+              <label><input type="checkbox" checked> Anki 記憶</label>
+              <label><input type="checkbox"> 語音記憶</label>
+              <label><input type="checkbox"> 故事記憶</label>
+              <label><input type="checkbox"> 口訣記憶</label>
+              <label><input type="checkbox" checked> 臨床案例</label>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>國考模式</h3>
+            <div class="exam-ladder">
+              <button class="hot">高頻考點</button>
+              <button>TOP 100</button>
+              <button>TOP 300</button>
+              <button>TOP 1000</button>
+              <button>歷屆考題</button>
+              <button>模擬考</button>
+            </div>
+            <div class="battle">
+              <div class="battle-row"><span>基礎醫學</span><div class="bar"><i></i></div><span>76%</span></div>
+              <div class="battle-row"><span>內外科</span><div class="bar"><i></i></div><span>64%</span></div>
+              <div class="battle-row"><span>婦兒精</span><div class="bar"><i></i></div><span>51%</span></div>
+              <div class="battle-row"><span>錯題回收</span><div class="bar"><i></i></div><span>38%</span></div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="mastery-board">
+        <div class="section-title">
+          <div>
+            <h3>核心模型熟習訓練室</h3>
+            <p>每一張地圖都用同一套閉環訓練：先理解模型，再用測驗、病例、國考與錯題回收逼出能力。</p>
+          </div>
+        </div>
+        <div class="model-lab">
+          <div class="deep-panel" id="deepPanel"></div>
+          <div class="deep-panel">
+            <h3>醫學生能力升級路徑</h3>
+            <div class="path">
+              <div class="path-step"><b>知識點</b><span>記住內容</span></div>
+              <div class="path-step"><b>節點</b><span>找到重點</span></div>
+              <div class="path-step"><b>地圖</b><span>建立結構</span></div>
+              <div class="path-step"><b>模型</b><span>建立理解</span></div>
+              <div class="path-step"><b>推理</b><span>解決問題</span></div>
+              <div class="path-step"><b>決策</b><span>臨床判斷</span></div>
+              <div class="path-step"><b>醫師</b><span>獨立思考</span></div>
+            </div>
+            <div class="mastery-meter">
+              <div class="mastery-score"><span>目前模型熟習度</span><span id="masteryScore">0%</span></div>
+              <div class="bar"><i id="masteryBar" style="width:0%"></i></div>
+            </div>
+            <div class="mastery-checks" id="masteryChecks"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="matrix-zone">
+        <div class="section-title">
+          <div>
+            <h3>Medical Map Master OS 一頁總表</h3>
+            <p>12 個模型各自對應一門核心學科、一種 AI 訓練方式、一個國考入口與一項臨床能力。</p>
+          </div>
+        </div>
+        <div class="table-panel">
+          <table class="data-table" id="onePageTable">
+            <thead>
+              <tr>
+                <th>模組</th>
+                <th>核心問題</th>
+                <th>核心地圖</th>
+                <th>AI 功能</th>
+                <th>國考對應</th>
+                <th>最終輸出</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="matrix-zone">
+        <div class="section-title">
+          <div>
+            <h3>AI 超級功能中心</h3>
+            <p>每個功能都服務同一件事：把知識從文字推進到結構、記憶、測驗、病例與決策。</p>
+          </div>
+        </div>
+        <div class="ai-function-grid" id="aiFunctionGrid"></div>
+      </section>
+
+      <section class="matrix-zone">
+        <div class="section-title">
+          <div>
+            <h3>AI 超級功能全量操作手冊</h3>
+            <p>每個 AI 模組都展開成可直接使用的學習工作流：何時用、輸入什麼、怎麼產出、如何驗收。</p>
+          </div>
+        </div>
+        <div class="ai-manual-grid" id="aiManualGrid"></div>
+      </section>
+
+      <section class="matrix-zone">
+        <div class="section-title">
+          <div>
+            <h3>12 OS 全量內容展開</h3>
+            <p>不只看架構，直接把 12 個核心模型的概念、節點、推理鏈、考點、臨床與錯誤修正全部攤開。</p>
+          </div>
+        </div>
+        <div class="full-atlas" id="fullAtlas"></div>
+      </section>
+
+      <section class="matrix-zone">
+        <div class="section-title">
+          <div>
+            <h3>醫學知識壓縮模型</h3>
+            <p>把北醫六年課程壓縮成 12 個核心模型，讓所有細節都有地方掛載。</p>
+          </div>
+        </div>
+        <div class="table-panel">
+          <table class="data-table" id="compressionTable">
+            <thead>
+              <tr>
+                <th>北醫六年課程</th>
+                <th>壓縮成</th>
+                <th>核心能力</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="loop-zone">
+        <div class="section-title">
+          <div>
+            <h3>終極學習閉環</h3>
+            <p>從 AI 地圖生成開始，到模型升級、國考通過、臨床勝任，形成可重複的學習作業系統。</p>
+          </div>
+        </div>
+        <div class="loop-track" id="learningLoop"></div>
+        <div class="loop-manual-grid" id="loopManual"></div>
+      </section>
+    
+    <!-- ══ 國考模式 Section ══ -->
+    <section class="exam-zone" id="examModeSection">
+      <div class="section-title">
+        <div>
+          <h3>📋 國考模式</h3>
+          <p>考頻考點 TOP100 · TOP300 · TOP1000 · 模擬考 · 歷屆考題 · 12 OS 對應</p>
+        </div>
+        <div class="exam-mode-tabs">
+          <button class="emt active" onclick="switchExamTab('top100',this)">🔥 TOP 100</button>
+          <button class="emt" onclick="switchExamTab('top300',this)">⭐ TOP 300</button>
+          <button class="emt" onclick="switchExamTab('top1000',this)">📚 TOP 1000</button>
+          <button class="emt" onclick="switchExamTab('mock',this)">📝 模擬考</button>
+          <button class="emt" onclick="switchExamTab('past',this)">📅 歷屆考題</button>
+        </div>
+      </div>
+
+      <!-- OS filter -->
+      <div class="os-filter-row">
+        <span class="os-filter-label">依 OS 篩選：</span>
+        <div class="os-filter-pills" id="osFilterPills"></div>
+      </div>
+
+      <!-- Tab panels -->
+      <div id="exam-panel-top100" class="exam-panel active-panel"></div>
+      <div id="exam-panel-top300" class="exam-panel" style="display:none"></div>
+      <div id="exam-panel-top1000" class="exam-panel" style="display:none"></div>
+      <div id="exam-panel-mock" class="exam-panel" style="display:none"></div>
+      <div id="exam-panel-past" class="exam-panel" style="display:none"></div>
+    </section>
+
+    </main>
+  </div>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const maps = [
+      {
+        title: "人體地圖 OS",
+        domain: "解剖學",
+        question: "人體長什麼樣？",
+        output: "看懂人體結構",
+        nodes: ["骨骼地圖", "肌肉地圖", "神經地圖", "血管地圖", "器官地圖", "腦神經 12 對", "脊神經", "動脈系統", "靜脈系統"]
+      },
+      {
+        title: "穩態流程圖 OS",
+        domain: "生理學",
+        question: "人體如何維持平衡？",
+        output: "看懂生理學",
+        nodes: ["血壓調控", "血糖調控", "體溫調控", "酸鹼平衡", "水分平衡", "電解質平衡", "內分泌調控"]
+      },
+      {
+        title: "代謝地圖 OS",
+        domain: "生化學",
+        question: "生命能量怎麼來？",
+        output: "看懂生化學",
+        nodes: ["糖解作用", "糖質新生", "肝醣代謝", "脂肪代謝", "蛋白質代謝", "TCA 循環", "電子傳遞鏈", "ATP 生成", "粒線體"]
+      },
+      {
+        title: "損傷地圖 OS",
+        domain: "病理學",
+        question: "疾病如何開始？",
+        output: "看懂病理學",
+        nodes: ["細胞受傷", "適應", "肥大", "增生", "萎縮", "化生", "壞死", "凋亡", "纖維化"]
+      },
+      {
+        title: "受體地圖 OS",
+        domain: "藥理學",
+        question: "藥物為何有效？",
+        output: "看懂藥理學",
+        nodes: ["alpha 1", "alpha 2", "beta 1", "beta 2", "M1", "M2", "M3", "Dopamine", "Histamine", "Serotonin"]
+      },
+      {
+        title: "免疫軍隊 OS",
+        domain: "微免學",
+        question: "人體如何防禦？",
+        output: "看懂微免學",
+        nodes: ["巨噬細胞", "樹突細胞", "中性球", "T 細胞", "B 細胞", "NK 細胞", "補體系統", "抗體系統", "細胞激素"]
+      },
+      {
+        title: "疾病生命史 OS",
+        domain: "內科學",
+        question: "疾病如何形成？",
+        output: "看懂內科學",
+        nodes: ["病因", "病理", "症狀", "檢查", "診斷", "治療", "預後", "糖尿病地圖", "高血壓地圖", "心衰竭地圖", "COPD 地圖", "中風地圖", "癌症地圖"]
+      },
+      {
+        title: "外科決策樹 OS",
+        domain: "外科學",
+        question: "何時開刀？",
+        output: "看懂外科學",
+        nodes: ["症狀", "理學檢查", "影像", "診斷", "適應症", "手術", "術後照護"]
+      },
+      {
+        title: "妊娠時間軸 OS",
+        domain: "婦產科",
+        question: "胎兒如何發育？",
+        output: "看懂婦產科",
+        nodes: ["第 1 週", "第 4 週", "第 8 週", "第 12 週", "第 24 週", "第 37 週", "胎盤", "荷爾蒙", "產科疾病"]
+      },
+      {
+        title: "發展時間軸 OS",
+        domain: "小兒科",
+        question: "小孩如何長大？",
+        output: "看懂小兒科",
+        nodes: ["粗動作", "細動作", "語言", "社交", "認知", "發展里程碑", "疫苗時間表"]
+      },
+      {
+        title: "神經網路 OS",
+        domain: "精神科",
+        question: "精神疾病如何形成？",
+        output: "看懂精神科",
+        nodes: ["血清素", "多巴胺", "GABA", "Glutamate", "Norepinephrine", "憂鬱症", "焦慮症", "思覺失調症", "ADHD"]
+      },
+      {
+        title: "風險矩陣 OS",
+        domain: "家醫科",
+        question: "誰容易生病？",
+        output: "看懂家醫科",
+        nodes: ["年齡", "肥胖", "抽菸", "飲酒", "高血壓", "高血糖", "高血脂", "家族史", "癌症風險", "心血管風險"]
+      }
+    ];
+
+    const modelMeta = [
+      {
+        coreMap: "神經、血管、器官",
+        ai: "3D 解剖、圖片測驗",
+        exam: "解剖",
+        finalPower: "人體結構力",
+        compressed: "人體地圖",
+        coreAbility: "結構理解",
+        drills: ["閉眼說出器官位置與相鄰關係", "用血管與神經重新定位一個器官", "完成圖片標示測驗並修正錯點", "把臨床症狀回推到解剖位置", "用 60 秒畫出一張人體分區圖"],
+        mastery: ["我能用空間位置描述主要器官", "我能把神經、血管、肌肉連成路徑", "我能從受傷位置推測可能症狀", "我能解釋影像或圖片中的結構", "我能把解剖知識用在臨床題幹"]
+      },
+      {
+        coreMap: "血壓、血糖、體溫",
+        ai: "流程動畫、控制迴路",
+        exam: "生理",
+        finalPower: "系統控制力",
+        compressed: "穩態地圖",
+        coreAbility: "控制理解",
+        drills: ["畫出感測器、控制中心、效應器", "指出負回饋被破壞的位置", "用流程圖解釋血壓或血糖變化", "把實驗數據轉成調控假說", "設計一題控制迴路考題"],
+        mastery: ["我能辨識穩態系統的輸入與輸出", "我能說明負回饋與正回饋", "我能把生理數值變化連到機制", "我能預測補償反應", "我能用控制模型解題"]
+      },
+      {
+        coreMap: "糖解、TCA、ATP",
+        ai: "代謝動畫、路徑圖",
+        exam: "生化",
+        finalPower: "能量理解力",
+        compressed: "代謝地圖",
+        coreAbility: "能量理解",
+        drills: ["標出每條路徑的入口與出口", "比較禁食、運動、糖尿病狀態", "把酵素缺陷連到代謝物堆積", "用 ATP 收支表解釋能量來源", "把代謝路徑轉成 Anki cloze"],
+        mastery: ["我能說出主要代謝路徑的目的", "我能追蹤碳流與能量流", "我能理解禁食與進食狀態切換", "我能從酵素缺陷推測疾病", "我能把代謝和臨床表現連起來"]
+      },
+      {
+        coreMap: "發炎、壞死、腫瘤",
+        ai: "病理生成鏈",
+        exam: "病理",
+        finalPower: "病理推理力",
+        compressed: "損傷地圖",
+        coreAbility: "疾病理解",
+        drills: ["把刺激、細胞反應、組織結果連成鏈", "比較壞死與凋亡", "用適應概念解釋器官變化", "從切片描述推測病理過程", "把腫瘤形成分成啟動與進展"],
+        mastery: ["我能說明疾病如何從細胞損傷開始", "我能區分適應、可逆傷害與不可逆傷害", "我能把發炎和修復連成時間序", "我能從病理名詞推理症狀", "我能用病理模型解釋檢查結果"]
+      },
+      {
+        coreMap: "alpha、beta、M 受體",
+        ai: "藥物配對系統",
+        exam: "藥理",
+        finalPower: "藥理理解力",
+        compressed: "受體地圖",
+        coreAbility: "治療理解",
+        drills: ["列出受體位置、作用與副作用", "把藥名配到受體與器官", "用 agonist/antagonist 解釋治療", "從副作用回推受體", "做一組藥物選擇題"],
+        mastery: ["我能把受體位置連到生理作用", "我能用受體解釋藥效", "我能預測常見副作用", "我能把疾病狀態配到用藥策略", "我能在題幹中快速定位藥理機制"]
+      },
+      {
+        coreMap: "T 細胞、B 細胞",
+        ai: "免疫軍隊圖",
+        exam: "微免",
+        finalPower: "免疫辨識力",
+        compressed: "免疫地圖",
+        coreAbility: "防禦理解",
+        drills: ["區分先天免疫與後天免疫", "畫出抗原呈現到抗體生成", "比較細胞免疫與體液免疫", "把病原體配到免疫反應", "用免疫失衡解釋疾病"],
+        mastery: ["我能辨識免疫細胞分工", "我能說出抗原呈現流程", "我能理解抗體、補體與細胞激素", "我能把免疫缺陷連到感染型態", "我能用免疫模型分析疾病"]
+      },
+      {
+        coreMap: "病因到治療",
+        ai: "疾病生命史",
+        exam: "內科",
+        finalPower: "疾病推理力",
+        compressed: "疾病地圖",
+        coreAbility: "因果理解",
+        drills: ["用七段生命史拆解一個疾病", "把症狀接到病理機制", "列出必要檢查與排除診斷", "比較一線與二線治療", "用預後與併發症收尾"],
+        mastery: ["我能從病因推到症狀", "我能由檢查結果回推機制", "我能建立鑑別診斷", "我能說明治療為何有效", "我能完整講出一個疾病生命史"]
+      },
+      {
+        coreMap: "診斷到治療",
+        ai: "AI 主治醫師",
+        exam: "外科",
+        finalPower: "臨床決策力",
+        compressed: "決策樹",
+        coreAbility: "決策理解",
+        drills: ["把症狀轉成紅旗警訊", "用影像與理學檢查縮小診斷", "列出開刀適應症與禁忌症", "比較保守、介入、手術治療", "設計術後照護清單"],
+        mastery: ["我能判斷病人是否需要立即處置", "我能用決策樹安排檢查", "我能說出手術適應症", "我能考慮術後風險", "我能在病例中做出下一步決策"]
+      },
+      {
+        coreMap: "妊娠時間軸",
+        ai: "發育動畫",
+        exam: "婦產",
+        finalPower: "時間推理力",
+        compressed: "妊娠軸",
+        coreAbility: "發育理解",
+        drills: ["標出第 1、4、8、12、24、37 週重點", "把胎盤與荷爾蒙放進時間軸", "用週數判斷檢查與風險", "比較早產、妊娠高血壓、妊娠糖尿病", "做一題產科急症判斷"],
+        mastery: ["我能用週數定位胎兒發育", "我能理解胎盤與荷爾蒙變化", "我能把產檢放到正確時間點", "我能辨識產科危險訊號", "我能用時間軸解題"]
+      },
+      {
+        coreMap: "發展里程碑",
+        ai: "發展評估系統",
+        exam: "小兒",
+        finalPower: "發展判斷力",
+        compressed: "發展軸",
+        coreAbility: "成長理解",
+        drills: ["整理粗動作、細動作、語言、社交", "把疫苗時間表放進年齡軸", "判斷是否發展遲緩", "比較正常變異與警訊", "用病例做兒童評估"],
+        mastery: ["我能用年齡推估應有能力", "我能辨識發展遲緩警訊", "我能把疫苗與年齡連結", "我能做基本發展評估", "我能用發展軸回答小兒題"]
+      },
+      {
+        coreMap: "神經傳導物質",
+        ai: "神經網路圖",
+        exam: "精神",
+        finalPower: "精神推理力",
+        compressed: "神經網路",
+        coreAbility: "神經理解",
+        drills: ["把血清素、多巴胺、GABA、麩胺酸定位", "比較憂鬱、焦慮、思覺失調、ADHD", "用傳導物質解釋藥物作用", "從症狀群組推測診斷", "做一題精神科鑑別診斷"],
+        mastery: ["我能把精神症狀連到神經網路", "我能理解主要神經傳導物質", "我能區分常見精神疾病", "我能用機制理解精神科用藥", "我能從題幹推理診斷"]
+      },
+      {
+        coreMap: "危險因子",
+        ai: "風險熱圖",
+        exam: "家醫",
+        finalPower: "預測管理力",
+        compressed: "風險矩陣",
+        coreAbility: "預測理解",
+        drills: ["建立年齡、肥胖、抽菸、三高矩陣", "把家族史與癌症風險加入評估", "用風險分層安排篩檢", "設計生活型態介入", "把預防醫學轉成追蹤計畫"],
+        mastery: ["我能辨識主要危險因子", "我能做基本風險分層", "我能安排篩檢與追蹤", "我能提出預防與生活建議", "我能用風險矩陣管理病人"]
+      }
+    ];
+
+    maps.forEach((map, index) => Object.assign(map, modelMeta[index]));
+    maps[5].title = "免疫地圖 OS";
+    maps[6].title = "疾病地圖 OS";
+    maps[7].title = "決策樹 OS";
+    maps[8].title = "妊娠軸 OS";
+    maps[9].title = "發展軸 OS";
+
+    const expandedContent = [
+      {
+        thesis: "人體地圖 OS 的重點不是背單一構造，而是建立三維定位能力：位置、相鄰、血管神經供應、功能與受傷後症狀要能連成一張空間地圖。",
+        map: ["骨骼提供座標系：顱骨、脊柱、胸廓、骨盆與四肢骨是所有器官與神經血管的定位框架。", "肌肉地圖要用起點、終點、神經支配與動作來記，不只背名稱。", "神經地圖分成中樞、周邊、腦神經、脊神經與自律神經，重點是病灶定位。", "血管地圖要掌握動脈供血區、靜脈回流與臨床阻塞後果。", "器官地圖要熟悉胸腔、腹腔、骨盆腔的相鄰關係，才能看懂影像與手術風險。"],
+        chain: ["外觀區域", "骨性標誌", "肌肉層次", "神經走向", "血管供應", "器官相鄰", "症狀定位"],
+        exam: ["腦神經功能與病灶定位：眼球運動、臉部感覺、吞嚥、舌頭偏斜。", "上肢與下肢神經損傷：radial、median、ulnar、femoral、sciatic。", "冠狀動脈、腦動脈與主要腹部動脈的供血區。", "腹股溝、腹膜、肝膽胰脾腎與骨盆腔相鄰關係。"],
+        clinical: ["看到無力或麻木時，先問是中樞、周邊神經、神經根、神經叢還是肌肉。", "看影像時用骨性標誌定位，再找器官、血管與病灶。", "開刀或穿刺前要知道危險血管與神經在哪裡。"],
+        pitfalls: ["只背構造名稱，沒有把它放回身體位置。", "把神經支配和血管供應混在一起。", "看到症狀不會反推病灶位置。"],
+        prompt: "請把「右手垂腕」用人體地圖 OS 展開：定位受傷神經、相關肌肉、感覺缺損、常見受傷位置、國考陷阱與一張 Anki 表。"
+      },
+      {
+        thesis: "穩態地圖 OS 的核心是控制迴路。任何生理題都可以拆成偵測變化、控制中心判讀、效應器反應、負回饋收斂。",
+        map: ["血壓由心輸出量、周邊阻力、血容量與腎素血管張力素系統共同調控。", "血糖由胰島素、升糖素、腎上腺素、皮質醇與肝臟代謝共同調控。", "體溫由下視丘整合產熱、散熱、發抖、流汗與血管收縮。", "酸鹼平衡由緩衝系統、肺部 CO2 排出與腎臟 HCO3- 調整。", "水分與電解質由 ADH、醛固酮、ANP、腎臟濃縮稀釋機制控制。"],
+        chain: ["刺激改變", "感受器偵測", "中樞整合", "荷爾蒙/神經輸出", "效應器反應", "負回饋", "新平衡"],
+        exam: ["baroreceptor reflex、RAAS、ADH 與 shock 補償。", "糖尿病、低血糖、飢餓與運動時的荷爾蒙切換。", "代謝性酸中毒、呼吸性鹼中毒與代償判讀。", "Na、K、Ca 異常與心電圖或神經肌肉表現。"],
+        clinical: ["低血壓病人要同時想血容量、心臟、血管張力與內分泌。", "抽血數值異常要判斷是原發問題還是代償反應。", "急診處理常常是先穩定穩態，再追病因。"],
+        pitfalls: ["只記單一荷爾蒙，不知道它在控制迴路中的角色。", "把代償當成病因。", "看到數值不會判斷方向與時間序。"],
+        prompt: "請用穩態地圖 OS 解釋「敗血性休克低血壓」：感受器、控制中心、補償、失代償、治療為什麼有效。"
+      },
+      {
+        thesis: "代謝地圖 OS 要把營養素變成能量流、碳流與還原力流。不是背路徑名稱，而是知道什麼狀態啟動哪條路。",
+        map: ["糖解作用把 glucose 變成 pyruvate，快速產 ATP，缺氧時走 lactate。", "TCA 循環把 acetyl-CoA 的能量轉成 NADH/FADH2。", "電子傳遞鏈用 NADH/FADH2 製造大量 ATP，依賴氧氣與粒線體。", "糖質新生在禁食時維持血糖，主要在肝臟與腎臟。", "脂肪酸 beta-oxidation 產生 acetyl-CoA，長期禁食可走 ketone body。", "蛋白質代謝連到尿素循環與胺基酸碳骨架。"],
+        chain: ["營養狀態", "荷爾蒙訊號", "路徑開關", "中間代謝物", "ATP/NADH", "器官分工", "臨床疾病"],
+        exam: ["糖解、TCA、ETC 的限速酵素與能量產量。", "飢餓、糖尿病、酒精、運動時代謝切換。", "粒線體疾病、G6PD deficiency、PDH deficiency、urea cycle defect。", "高乳酸、酮酸中毒、低血糖的機制。"],
+        clinical: ["DKA 是胰島素不足造成脂肪分解、ketone 上升與酸中毒。", "缺氧或 shock 會讓 pyruvate 轉 lactate，形成 lactic acidosis。", "肝病會影響糖質新生、尿素循環與藥物代謝。"],
+        pitfalls: ["把代謝路徑當孤立圖，不會切換進食/禁食狀態。", "只背酵素，沒有連到臨床表現。", "忘記粒線體與氧氣在 ATP 生成中的角色。"],
+        prompt: "請用代謝地圖 OS 解釋「糖尿病酮酸中毒」：胰島素、脂肪分解、ketone、酸中毒、K+ 變化與治療順序。"
+      },
+      {
+        thesis: "損傷地圖 OS 是疾病的起點。細胞遇到壓力後，可能適應、可逆受傷、不可逆受傷、死亡、修復或走向腫瘤。",
+        map: ["適應包含肥大、增生、萎縮、化生，是細胞面對壓力的生存策略。", "可逆傷害常見細胞腫脹、脂肪變性與功能下降。", "不可逆傷害進入壞死或凋亡，壞死常伴發炎，凋亡較乾淨。", "發炎分急性與慢性，急性以中性球為主，慢性以淋巴球、巨噬細胞與纖維化為主。", "修復包含再生與纖維化，過度修復會造成器官硬化。", "腫瘤形成涉及基因突變、增殖失控、逃避免疫與轉移。"],
+        chain: ["刺激", "細胞壓力", "適應", "可逆傷害", "不可逆傷害", "發炎修復", "器官功能改變"],
+        exam: ["肥大、增生、萎縮、化生的例子與可逆性。", "coagulative、liquefactive、caseous、fat necrosis。", "急性發炎血管變化、白血球滾動黏附穿出。", "肉芽腫、纖維化、腫瘤良惡性特徵。"],
+        clinical: ["心肌梗塞後壞死與發炎時間序會影響併發症。", "慢性肝炎到肝硬化是反覆損傷與纖維化的結果。", "Barrett esophagus 是化生，也是癌前變化。"],
+        pitfalls: ["混淆 necrosis 與 apoptosis。", "把適應當成癌症，或忽略化生的癌前風險。", "只背病理名詞，不會推器官功能後果。"],
+        prompt: "請用損傷地圖 OS 展開「心肌梗塞後 1 天到 2 週的病理變化」：細胞死亡、發炎細胞、併發症與國考考點。"
+      },
+      {
+        thesis: "受體地圖 OS 把藥理從藥名背誦變成受體推理。知道受體在哪裡、活化後做什麼，就能推藥效、副作用與禁忌。",
+        map: ["alpha1 主要造成血管收縮、瞳孔放大與膀胱括約肌收縮。", "alpha2 常作為 presynaptic brake，降低交感輸出。", "beta1 在心臟增加心跳、收縮力與 renin。", "beta2 造成支氣管擴張、血管擴張、子宮放鬆與代謝效應。", "M2 降低心跳，M3 促進腺體分泌、支氣管收縮、腸胃蠕動與膀胱收縮。", "Dopamine、histamine、serotonin 受體連到精神、過敏、止吐、偏頭痛與腸胃功能。"],
+        chain: ["受體位置", "訊號傳遞", "器官反應", "藥物作用", "治療效果", "副作用", "禁忌"],
+        exam: ["交感與副交感受體分布。", "beta blocker、alpha blocker、antimuscarinic、cholinesterase inhibitor。", "氣喘、心衰竭、高血壓、BPH、青光眼用藥。", "藥物副作用從受體位置反推。"],
+        clinical: ["氣喘病人使用非選擇性 beta blocker 可能誘發支氣管收縮。", "BPH 可用 alpha1 blocker 放鬆攝護腺與膀胱出口。", "抗膽鹼藥可能造成口乾、尿滯留、便秘、視力模糊。"],
+        pitfalls: ["只記藥名，不知道作用受體。", "忘記同一受體在不同器官有不同臨床後果。", "忽略副作用其實是藥效在非目標器官出現。"],
+        prompt: "請用受體地圖 OS 整理「氣喘、心衰竭、高血壓、BPH」常用藥：受體、器官、效果、副作用與禁忌。"
+      },
+      {
+        thesis: "免疫地圖 OS 是一支軍隊：先天免疫快速辨識，後天免疫精準記憶；發炎、抗體、補體與細胞毒殺共同防禦。",
+        map: ["巨噬細胞吞噬病原、分泌 cytokine，並協助抗原呈現。", "樹突細胞是專業 antigen-presenting cell，負責啟動 naive T cell。", "中性球是急性細菌感染第一線。", "T helper cell 指揮免疫反應，cytotoxic T cell 殺死感染細胞。", "B cell 分化成 plasma cell 產生抗體，也形成 memory B cell。", "NK cell 對付 MHC I 下降的病毒感染或腫瘤細胞。", "補體可 opsonization、chemotaxis、形成 MAC。"],
+        chain: ["病原入侵", "先天辨識", "發炎訊號", "抗原呈現", "T/B 細胞活化", "清除病原", "免疫記憶"],
+        exam: ["MHC I/II、CD4/CD8、Th1/Th2/Th17/Treg。", "IgM、IgG、IgA、IgE、IgD 功能。", "補體 classical、lectin、alternative pathway。", "hypersensitivity type I-IV、免疫缺陷與自體免疫。"],
+        clinical: ["HIV 攻擊 CD4 T cell，造成伺機性感染。", "IgE 與 mast cell 造成過敏與 anaphylaxis。", "免疫抑制病人感染表現可能不典型。"],
+        pitfalls: ["混淆 MHC I 給 CD8、MHC II 給 CD4。", "把抗體免疫與細胞免疫混在一起。", "看到免疫疾病時不會判斷是過強、過弱還是打錯目標。"],
+        prompt: "請用免疫地圖 OS 解釋「結核肉芽腫」：巨噬細胞、Th1、IFN-gamma、caseous necrosis、檢查與治療。"
+      },
+      {
+        thesis: "疾病地圖 OS 讓內科變成生命史推理：病因如何造成病理，病理如何造成症狀，檢查如何驗證，治療如何逆轉或控制機制。",
+        map: ["病因包含基因、感染、免疫、代謝、血管、退化與環境。", "病理是疾病造成器官與細胞功能改變的橋樑。", "症狀是病理變化被病人感受到的結果。", "檢查用來確認機制、嚴重度、併發症與排除其他疾病。", "診斷要整合病史、理學檢查、實驗室、影像與標準。", "治療分成急救、病因治療、症狀控制、預防併發症與長期追蹤。"],
+        chain: ["病因", "危險因子", "病理機制", "症狀", "檢查", "診斷", "治療", "預後"],
+        exam: ["糖尿病、高血壓、心衰竭、COPD、中風、癌症的病因到治療。", "內科題幹常考下一步檢查、最佳治療、併發症與禁忌。", "常見 lab pattern：貧血、肝腎功能、電解質、發炎指標、內分泌。", "慢性病控制目標與急性惡化處置。"],
+        clinical: ["心衰竭要分 HFrEF/HFpEF、容量狀態、誘發因子與藥物死亡率效益。", "COPD 急性惡化要評估氧氣、支氣管擴張、類固醇、抗生素與呼吸衰竭。", "中風要先分出血或缺血，再判斷時間窗與禁忌。"],
+        pitfalls: ["只背診斷名稱，沒有病因到治療的因果鏈。", "看到症狀就跳治療，忽略危急排除。", "不會把慢性控制和急性處置分開。"],
+        prompt: "請用疾病地圖 OS 拆解「心衰竭」：病因、病理、症狀、檢查、診斷分類、急性處置、慢性藥物與預後。"
+      },
+      {
+        thesis: "決策樹 OS 的核心是下一步。臨床不是知道所有答案，而是在資訊不足時做出安全、合理、可更新的決策。",
+        map: ["症狀先分穩定與不穩定，紅旗警訊優先處理。", "理學檢查用來確認病灶位置、嚴重度與是否需要立即處置。", "影像與實驗室檢查要根據前測機率選擇，不是亂槍打鳥。", "診斷確立後要判斷保守治療、介入治療或手術。", "手術適應症包含生命威脅、器官壞死、穿孔、阻塞、惡性腫瘤或保守失敗。", "術後照護要追蹤感染、出血、疼痛、營養、活動與併發症。"],
+        chain: ["症狀", "穩定度", "理學檢查", "影像/檢驗", "診斷", "適應症", "手術/處置", "術後照護"],
+        exam: ["急性腹痛：appendicitis、cholecystitis、pancreatitis、bowel obstruction、perforation。", "創傷 ABCDE、出血控制與影像選擇。", "腫瘤手術適應症、分期與術前評估。", "術後 fever、atelectasis、DVT、PE、wound infection。"],
+        clinical: ["急腹症要先排除穿孔、缺血、破裂、阻塞與敗血症。", "不穩定病人先 resuscitation，再做能改變處置的檢查。", "術後問題要用時間軸判斷最可能原因。"],
+        pitfalls: ["把診斷題當知識題，忘記臨床真正問的是下一步。", "穩定與不穩定病人用同一套流程。", "看到影像就忘記病人整體風險與手術適應症。"],
+        prompt: "請用決策樹 OS 處理「右下腹痛疑似 appendicitis」：紅旗、鑑別、檢查、手術適應症、抗生素、術後併發症。"
+      },
+      {
+        thesis: "妊娠軸 OS 用時間理解婦產科。胎兒、胎盤、荷爾蒙、產檢、疾病風險都要放回週數，週數就是決策座標。",
+        map: ["第 1 週到第 4 週重點是著床、早期胚胎與器官形成起點。", "第 8 週左右主要器官雛形完成，畸胎風險與器官生成密切相關。", "第 12 週進入較穩定的胎兒期，常連到第一孕期篩檢。", "第 24 週涉及 viability、早產處置與肺部成熟思考。", "第 37 週接近足月，決策重點轉向分娩方式與母胎安全。", "胎盤負責氣體、營養、廢物交換，也分泌 hCG、progesterone、estrogen、hPL。"],
+        chain: ["週數", "胚胎/胎兒發育", "胎盤荷爾蒙", "產檢篩檢", "母體疾病", "胎兒風險", "分娩決策"],
+        exam: ["ectopic pregnancy、spontaneous abortion、preeclampsia、gestational diabetes。", "產前篩檢時間、Rh incompatibility、GBS screening。", "早產、PROM、placenta previa、placental abruption。", "胎心監測、產程判讀、產後出血。"],
+        clinical: ["懷孕出血要先依週數分早期流產/子宮外孕、前置胎盤、胎盤早期剝離。", "高血壓合併蛋白尿要想到 preeclampsia 與母胎風險。", "產科處置常在母體安全與胎兒成熟度間取平衡。"],
+        pitfalls: ["不先問週數就開始判斷。", "混淆 placenta previa 與 abruption 的疼痛、出血型態。", "忘記妊娠疾病同時看母體與胎兒。"],
+        prompt: "請用妊娠軸 OS 整理「懷孕第三孕期陰道出血」：週數、前置胎盤、胎盤早剝、檢查禁忌、處置與國考陷阱。"
+      },
+      {
+        thesis: "發展軸 OS 用年齡判斷小兒。粗動作、細動作、語言、社交、認知與疫苗都要放在同一條成長時間軸。",
+        map: ["粗動作從抬頭、翻身、坐、爬、站、走到跑跳。", "細動作從抓握、傳手、鉗狀抓握、疊積木到畫圖寫字。", "語言從咿呀、單字、兩字句到完整句子。", "社交從微笑、認人、分離焦慮到互動遊戲。", "認知從物體恆存、模仿、象徵遊戲到學習能力。", "疫苗時間表要與年齡、禁忌、補接種連動。"],
+        chain: ["年齡", "粗動作", "細動作", "語言", "社交", "認知", "疫苗", "警訊"],
+        exam: ["2、4、6、9、12、18、24 個月常見里程碑。", "發展遲緩、autism red flags、hearing loss、cerebral palsy。", "疫苗時程、活性疫苗禁忌、發燒與接種判斷。", "生長曲線、青春期、營養與篩檢。"],
+        clinical: ["發展評估要看多個面向，不只看會不會走路。", "語言遲緩要檢查聽力，也要注意自閉症社交警訊。", "小兒不是小大人，劑量、正常值、疾病表現都受年齡影響。"],
+        pitfalls: ["只背單一年齡點，沒有形成連續時間軸。", "把正常變異誤判成遲緩，或忽略紅旗。", "疫苗時程與疾病風險分開背。"],
+        prompt: "請用發展軸 OS 評估「18 個月還不會說單字」：正常里程碑、紅旗、鑑別、檢查、轉介與家長衛教。"
+      },
+      {
+        thesis: "神經網路 OS 把精神科從症狀列表變成迴路推理。情緒、思考、注意力、衝動與睡眠都可以連到神經傳導物質與腦網路。",
+        map: ["serotonin 連到情緒、焦慮、睡眠、食慾與衝動控制。", "dopamine 連到獎賞、動機、精神病症狀、注意力與運動。", "GABA 是主要抑制性傳導，與焦慮、鎮靜、癲癇相關。", "glutamate 是主要興奮性傳導，與學習、記憶與精神病機制相關。", "norepinephrine 連到警覺、注意力、壓力反應與憂鬱症狀。", "精神疾病診斷要看症狀群、時間長度、功能受損與排除物質或身體疾病。"],
+        chain: ["症狀群", "時間標準", "功能受損", "排除原因", "神經網路", "藥物機制", "心理社會介入"],
+        exam: ["major depressive disorder、bipolar disorder、anxiety、schizophrenia、ADHD。", "SSRI、SNRI、benzodiazepine、antipsychotic、stimulant、mood stabilizer。", "自殺風險評估、精神病症狀、mania vs hypomania。", "藥物副作用：EPS、NMS、serotonin syndrome、QT prolongation。"],
+        clinical: ["精神科要先評估安全：自殺、傷人、失去現實感、物質使用。", "思覺失調症陽性症狀常連到 dopamine，陰性與認知症狀更複雜。", "用藥選擇要同時考慮症狀、共病、副作用與依從性。"],
+        pitfalls: ["只靠單一症狀下診斷，忽略時間與功能受損。", "把憂鬱和雙相憂鬱混淆，導致用藥風險。", "忽略身體疾病或物質造成的精神症狀。"],
+        prompt: "請用神經網路 OS 分析「失眠、低落、無望感、自殺意念」：診斷標準、風險評估、神經傳導物質、治療與安全計畫。"
+      },
+      {
+        thesis: "風險矩陣 OS 是預防醫學的大腦。用年齡、行為、代謝、家族史與既往病史估計未來風險，再決定篩檢、介入與追蹤。",
+        map: ["年齡是許多癌症、心血管疾病與退化性疾病的基礎風險軸。", "肥胖連到 insulin resistance、高血壓、脂肪肝、睡眠呼吸中止與癌症風險。", "抽菸增加 COPD、肺癌、心血管疾病、周邊血管疾病。", "飲酒連到肝病、癌症、意外與精神健康。", "高血壓、高血糖、高血脂是心血管風險核心三角。", "家族史會改變篩檢起始年齡與警覺度。"],
+        chain: ["個人資料", "危險因子", "風險分層", "篩檢策略", "生活介入", "藥物預防", "追蹤調整"],
+        exam: ["ASCVD risk、metabolic syndrome、糖尿病與高血壓篩檢。", "乳癌、子宮頸癌、大腸癌、肺癌篩檢原則。", "戒菸、減重、疫苗、老人醫學與健康檢查。", "primary、secondary、tertiary prevention。"],
+        clinical: ["家醫科重點是把風險轉成可執行計畫，而不是只告訴病人危險。", "篩檢要看族群、年齡、風險與檢查傷害。", "慢性病管理要追蹤目標、藥物副作用與生活型態。"],
+        pitfalls: ["把篩檢當成越多越好，忽略偽陽性與傷害。", "只看單一數值，不整合整體風險。", "忽略病人可行性與長期追蹤。"],
+        prompt: "請用風險矩陣 OS 幫「52 歲男性、抽菸、BMI 31、高血壓、父親心肌梗塞」建立風險分層、篩檢與追蹤計畫。"
+      }
+    ];
+
+    maps.forEach((map, index) => Object.assign(map, { expanded: expandedContent[index] }));
+
+    // ══ nodeDatabase ══
+    const nodeDatabase = {
+      0: {
+        "骨骼地圖": {
+          def: "骨骼系統提供支撐、保護器官、產生血球（紅骨髓）、儲存鈣磷、並作為肌肉槓桿。",
+          mech: "骨質由破骨細胞（Osteoclast）分解和成骨細胞（Osteoblast）合成持續動態更新。PTH促進破骨，Calcitonin抑制破骨，Vit D促進Ca2+吸收。",
+          mnem: "SCPAM：Support支撐 / Calcium儲鈣 / Protection保護 / Attached肌肉附著 / Make blood造血",
+          exam: ["骨骼標誌定位：McBurney點（闌尾）、ASIS（前髂棘）、Poupart韌帶（腹股溝）","骨折癒合4期：血腫→纖維性骨痂→骨性骨痂→改塑","骨質疏鬆：PTH↑或Estrogen↓→破骨>成骨→骨折風險↑","椎體：C3-C7頸椎、T1-T12胸椎連肋骨、L1-L5腰椎"],
+          anki: [["Q：PTH對骨骼的作用？","A：促進破骨細胞（Osteoclast）活性→血鈣↑。慢性↑→骨質流失（纖維囊性骨炎）"],["Q：骨質疏鬆vs骨軟化症？","A：骨質疏鬆：BMD↓，Ca正常；骨軟化症：Ca↓P↓ALP↑，Looser zone（假性骨折線）"],["Q：股骨頸骨折最嚴重的併發症？","A：股骨頭缺血性壞死（AVN）；旋股內動脈支中斷"]],
+          cmp: [["骨質疏鬆症","骨軟化症"],["Ca正常、BMD↓","Ca↓、P↓、ALP↑↑"],["X光：骨密度↓","X光：Looser zone假性骨折"],["治療：Bisphosphonate+Ca+VitD","治療：補VitD、Ca、P"],["停經後女性最常見","VitD缺乏或吸收不良"]],
+          clin: "股骨頸骨折後脂肪栓塞（Fat embolism）：24-72小時後出現呼吸困難+意識改變+瘀斑三聯症；治療支持療法+O2補充。",
+          trap: "脂肪栓塞 vs PE：脂肪栓塞有瘀斑（皮膚毛細血管）、ECG正常、發生在骨折後24-72h；PE無皮膚症狀但ECG可有S1Q3T3。"
+        },
+        "腦神經 12 對": {
+          def: "從腦幹和大腦底部發出的12對神經，控制頭頸部感覺、運動與自律功能。",
+          mech: "CN I-II從端腦/間腦；CN III-XII從腦幹（中腦、橋腦、延腦）。感覺核、運動核與自律核各有定位。",
+          mnem: "Oh Oh Oh To Touch And Feel Very Good Velvet AH：嗅（I）視（II）動眼（III）滑車（IV）三叉（V）外展（VI）顏面（VII）聽（VIII）舌咽（IX）迷走（X）副（XI）舌下（XII）",
+          exam: ["CN III損傷：瞳孔散大+眼瞼下垂+外斜視；後交通動脈瘤最重要原因","CN VII：核上（腦中風）=對側下臉；核下Bell=同側全臉（含額頭）","CN V三叉神經痛：觸發點誘發，第一線Carbamazepine","CN X損傷：聲音沙啞、吞嚥困難、心跳加快"],
+          anki: [["Q：Horner症候群三聯症？","A：Ptosis（上瞼下垂）+ Miosis（縮瞳）+ Anhidrosis（無汗）= 交感鏈受損"],["Q：Bell palsy vs 中樞性顏面麻痹？","A：Bell（核下）=同側全臉癱（額頭癱）；中樞（核上）=對側下臉（額頭保留，雙側皮質支配）"],["Q：瞳孔散大固定的緊急意義？","A：幕上占位疝出壓迫CN III→Herniation外科急症！立即神經外科介入"]],
+          cmp: [["核上（中樞）顏面麻痹","核下（周邊）Bell palsy"],["對側下半臉癱","同側整臉癱（含額頭）"],["額頭皺眉保留","額頭癱瘓（無法皺眉）"],["病因：腦中風、腦瘤","病因：HSV特發性、帶狀疱疹"],["治療原發病","早期Prednisolone縮短病程"]],
+          clin: "後交通動脈瘤（PCOM aneurysm）：痛性CN III麻痹（眼眶痛+瞳孔散大）→MRA/CTA確認→破裂→SAH（雷劈樣頭痛）。",
+          trap: "CN III完全麻痹（瞳孔散大+眼瞼下垂+眼球偏外下）≠單純眼球運動障礙；瞳孔散大提示壓迫性病灶（動脈瘤），需緊急排除SAH。"
+        },
+        "血管地圖": {
+          def: "全身動靜脈系統提供組織灌流、回收廢物，整合心肺腎功能。BP=CO×TPR。",
+          mech: "Frank-Starling：前負荷↑→心輸出量↑；後負荷↑→心輸出量↓。動脈供血→微循環→靜脈回流→右心→肺→左心→體循環。",
+          mnem: "冠脈記憶：LAD=前壁（V1-V4）；LCx=側壁；RCA=下壁（II/III/aVF）；MCA=最常見中風動脈",
+          exam: ["Willis環：ACA+MCA+PCA+ACOM+PCOM組成前後循環橋接","LAD阻塞=前壁MI（V1-V4 ST↑）；RCA=下壁（II/III/aVF ST↑）","AAA（腹主動脈瘤）：搏動腫塊+腰背痛+低血壓=破裂外科急症","主動脈剝離：A型（升主動脈）=手術急症；B型=藥物（β-blocker+Nitroprusside）"],
+          anki: [["Q：Willis環的組成？","A：雙側ACA（連ACOM）+雙側ICA+雙側PCA（連PCOM）；側枝循環保護腦灌流"],["Q：LAD vs RCA阻塞的ECG差異？","A：LAD=V1-V4 ST↑（前壁）；RCA=II/III/aVF ST↑（下壁）±V3R/V4R（右心室梗塞）"],["Q：Virchow三聯症？","A：停滯（Stasis）+高凝（Hypercoagulability）+內皮損傷（Endothelial injury）=DVT/PE的危險因子"]],
+          cmp: [["動脈栓塞（Embolism）","動脈血栓（Thrombosis）"],["突然發作","漸進發作"],["心源性（AF、MI後）最常見","動脈粥狀硬化基礎"],["5P（Pain/Pallor/Paresthesia/Pulseless/Paralysis）","逐漸加重5P"],["治療：緊急取栓手術","治療：溶栓或取栓"]],
+          clin: "中風定位：ACA=對側腿癱；MCA=對側上肢+臉+失語（左MCA）；PCA=視野缺損；PICA=Wallenberg（同側臉+對側肢體感覺喪失）。",
+          trap: "主動脈剝離：A型禁止溶栓！患者可能有MI表現（冠狀動脈口受累），先排除剝離再決定治療。"
+        }
+      },
+      1: {
+        "血壓調控": {
+          def: "血壓=心輸出量（CO）×周邊阻力（TPR）。短期靠神經（baroreceptor reflex），長期靠腎臟（RAAS）調控。",
+          mech: "RAAS：腎缺血→Renin→Ang I→ACE→Ang II→Aldosterone→Na/水滯留→BP↑。短期：Baroreceptor→交感↑→HR↑+血管收縮。",
+          mnem: "RAAS鏈：Renin Ate A Apple And Noodles=BP↑（Renin→Ang I→ACE→Ang II→Aldosterone→Na/水→BP↑）",
+          exam: ["高血壓急症：BP↑+靶器官損傷→靜脈Labetalol/Nicardipine，1小時降20-25%","繼發性高血壓5A：Aldosteronism/Artery（腎動脈狹窄）/Apnea（睡眠呼吸中止）/Adrenergic（嗜鉻瘤）/Abuse","降壓藥選擇：DM腎病→ACEI/ARB；老人→CCB/Thiazide；心衰→ACEI+β-blocker；妊娠→Labetalol","難治性高血壓：3種藥最大劑量仍高→加Spironolactone（最有效）"],
+          anki: [["Q：RAAS各環節的阻斷藥物？","A：Renin→Aliskiren；ACE→ACEI（Ramipril）；AT1→ARB（Losartan）；Aldosterone受體→Spironolactone"],["Q：Conn症候群診斷步驟？","A：低K+高血壓→ARR>30（篩查）→Fludrocortisone抑制試驗→CT→單側腺瘤手術；雙側增生→Spironolactone"],["Q：ACEI三大禁忌？","A：雙側腎動脈狹窄（→腎衰竭）、孕婦（D類致畸）、血管性水腫病史"]],
+          cmp: [["ACEI","ARB"],["抑制ACE→Ang II↓+Bradykinin↑","阻斷AT1受體"],["乾咳10-20%","無乾咳"],["血管性水腫（罕見）","極少血管性水腫"],["Ramipril、Enalapril","Losartan（也降尿酸）、Valsartan"]],
+          clin: "過度降壓風險：慢性高血壓者腦自動調控上移→快速降至正常→腦灌流不足→缺血性中風。急症只降20-25%；例外：主動脈剝離需降SBP<120。",
+          trap: "Hypertensive urgency（緊急）vs Emergency（急症）：urgency=BP很高但無靶器官損傷→口服緩慢降；emergency=有靶器官損傷→靜脈快速降。不能搞混！"
+        },
+        "血糖調控": {
+          def: "血糖由胰島素（降糖）、升糖素（升糖）、腎上腺素、皮質醇及肝臟代謝共同維持在60-100mg/dL（空腹）。",
+          mech: "進食→血糖↑→β細胞分泌胰島素→GLUT4→葡萄糖進入細胞→血糖↓；空腹→升糖素→肝醣分解+糖質新生→血糖↑。",
+          mnem: "胰島素合成代謝GLAM：Glucose uptake↑ / Lipogenesis↑ / Amino acid↑ / mRNA合成↑。升糖素=全部反向（分解代謝）",
+          exam: ["DM診斷：FPG>=126/2hOGTT>=200/HbA1c>=6.5%/隨機血糖>=200+症狀（符合一項）","DKA補鉀原則：K<3.5→先補K才給胰島素；K 3.5-5.5→同時補；K>5.5→暫不補","T2DM治療：Metformin→SGLT2i（心腎保護）→GLP-1RA（降體重）→基礎胰島素","低血糖：神智清→15g碳水口服；昏迷→50%葡萄糖靜脈或Glucagon肌注"],
+          anki: [["Q：DKA的SIP補充順序？","A：Saline（補液）→Insulin（胰島素，K>3.5才給）→Potassium（補K+）→glucose降至250換D5W"],["Q：Somogyi vs Dawn現象？","A：Somogyi：夜間低血糖→反彈早晨高血糖（降晚間胰島素）；Dawn：清晨GH↑→血糖↑（增加基礎胰島素）"],["Q：SGLT2i的主要優點？","A：抑制近端小管葡萄糖重吸收→尿糖↑→血糖↓+降體重+心腎保護（Empagliflozin、Dapagliflozin）"]],
+          cmp: [["DKA","HHS"],["DM Type 1為主","DM Type 2為主"],["血糖250-600","血糖>600常>900"],["酮體+，AG升高，pH<7.3","酮體陰性，滲透壓>320"],["意識改變不一定","意識改變常見"]],
+          clin: "胰島素種類：速效（Lispro/Aspart）15分起效；短效（Regular）30分；中效（NPH）1-2h；長效（Glargine/Detemir）24h平穩無峰值。",
+          trap: "Metformin禁忌：eGFR<30（乳酸酸中毒）、碘顯影劑前後48小時停用、手術前停用、急性心衰/嚴重肝病。"
+        },
+        "酸鹼平衡": {
+          def: "血pH 7.35-7.45靠三套系統維持：緩衝系統（即時）、肺（分鐘）、腎臟（天）。HH方程式：pH=pKa+log([HCO3-]/0.03xPaCO2)。",
+          mech: "腎臟調整HCO3-（代謝），肺部控制PaCO2（呼吸）。代謝性酸→肺加速排CO2代償；呼吸性酸→腎保留HCO3-代償。",
+          mnem: "ROME判讀：Respiratory Opposite（呼吸pH反向），Metabolic Equal（代謝pH同向）。代謝酸代償Winter公式：PaCO2=1.5xHCO3+8±2",
+          exam: ["AG=Na-(Cl+HCO3)，正常8-12；HAGMA病因MUDPILES：甲醇/尿毒/DKA/丙二醇/異菸肼/乳酸/乙二醇/水楊酸","呼吸酸中毒代償：急性每PaCO2↑10→HCO3+1；慢性→HCO3+3.5","代謝鹼中毒：嘔吐/NG引流/利尿劑→低K+低Cl-；尿Cl-<25=salt-responsive","RTA：Type I（遠端）=低K+；Type II（近端）=低K+；Type IV=高K+（Hypoaldosteronism）"],
+          anki: [["Q：AG計算的白蛋白校正？","A：白蛋白每低1g/dL，正常AG降2.5；低白蛋白血症→AG被低估"],["Q：代謝鹼中毒的治療？","A：Salt-responsive（尿Cl<25）→NS補充Cl-；Salt-resistant（原發醛固酮增多症）→Spironolactone"],["Q：Delta-delta ratio的意義？","A：(AG-12)/(24-HCO3)；>2=合併代謝鹼；<1=合併正常AG酸；1-2=單純HAGMA"]],
+          cmp: [["HAGMA（高AG代謝酸）","NAGMA（正常AG高氯性酸）"],["AG>12","AG正常，Cl-↑"],["MUDPILES病因","腹瀉、RTA、Acetazolamide"],["HCO3-↓","HCO3-↓，Cl-↑"]],
+          clin: "機械通氣目標：pH 7.35-7.45，PaO2 60-80，PaCO2 35-45；ARDS允許性高碳酸血症（PaCO2 50-60），低潮氣量6mL/kg保護肺。",
+          trap: "代謝鹼中毒+AG升高→三重酸鹼問題；DKA治療後HCO3-恢復但AG仍高→代謝鹼合併；需計算delta-delta ratio確認。"
+        }
+      },
+      2: {
+        "糖解作用": {
+          def: "葡萄糖在細胞質中分解為丙酮酸（Pyruvate），產生2 ATP和2 NADH，無需氧氣（無氧代謝的基礎）。",
+          mech: "10步反應，限速酶PFK-1（第3步）：被ATP/Citrate抑制（能量充足），被AMP/ADP/Fructose-2,6-BP活化（能量不足）。",
+          mnem: "PFK-1活化：AMP+ADP=沒電力→啟動糖解；抑制：ATP+Citrate=已足夠→停糖解。G6P三去向：糖解、糖原合成、HMP shunt（G6PD）",
+          exam: ["缺氧→丙酮酸→乳酸（LDH催化），再生NAD+維持糖解；乳酸堆積→乳酸酸中毒","G6PD缺乏：HMP shunt受損→NADPH↓→溶血（Primaquine/蠶豆誘發），Heinz body","Pyruvate去向：有氧→乙醯CoA（PDH需B1）；缺氧→乳酸；轉胺→丙胺酸","Warburg效應：癌細胞有氧糖解→乳酸（PET scan利用此原理）"],
+          anki: [["Q：PFK-1活化和抑制因子？","A：活化：AMP/ADP/Fructose-2,6-BP（胰島素促進合成）；抑制：ATP/Citrate/H+；能量低→AMP↑→PFK-1活化"],["Q：G6PD缺乏症的血液抹片？","A：Heinz body（氧化Hb沉積）+Bite cell（脾臟咬噬）+Coombs陰性溶血；X染色體連鎖隱性，男性較嚴重"],["Q：PDH缺乏症的治療？","A：丙酮酸→乙醯CoA受阻→乳酸酸中毒；高脂低碳飲食+補充Thiamine（B1）"]],
+          cmp: [["有氧代謝（正常）","Warburg效應（癌症）"],["丙酮酸→乙醯CoA（粒線體）","丙酮酸→乳酸（有氧條件下）"],["高ATP效率（36-38 ATP）","低ATP（2 ATP）"],["生成能量為主","生成生物合成碳架（為增殖服務）"]],
+          clin: "敗血症乳酸升高（>2mmol/L）=組織缺氧+粒線體功能障礙；乳酸>4+升壓劑=Septic shock；Metformin+碘顯影劑→乳酸酸中毒（需停藥48h）。",
+          trap: "G6PD缺乏者：感染本身（氧化壓力）也可誘發溶血，不只是藥物；也要避免Dapsone、磺胺類、Nitrofurantoin；治療：支持療法，輸血（嚴重溶血）。"
+        },
+        "TCA 循環": {
+          def: "乙醯CoA（2碳）在粒線體與草醋酸（4碳）縮合成檸檬酸（6碳），循環8步產生3NADH、1FADH2、1GTP，再生草醋酸。",
+          mech: "每循環3NADH+1FADH2+1GTP。限速酶：異檸檬酸去氫酶（被NADH/ATP抑制，被Ca2+活化）。B1依賴酶：PDH和α-KG去氫酶。",
+          mnem: "Citrate Is Krebs Starting Substrate For Making OAA（C-I-K-S-S-F-M-O）：檸→異檸→α-KG→琥珀醯→琥珀→延胡索→蘋果→草醋酸",
+          exam: ["B1（Thiamine）依賴酶：PDH（丙酮酸→乙醯CoA）、α-KG去氫酶（TCA第5步）、轉酮醇酶（HMP shunt）","TCA中間物生合成：α-KG→Glu；Succinyl-CoA→血紅素；Citrate→脂肪酸合成","一圈TCA：3NADH+1FADH2+1GTP=共10能量單位；一分子葡萄糖走兩圈","飲酒→大量NADH→TCA受抑制→糖質新生受阻→低血糖"],
+          anki: [["Q：TCA哪兩步放CO2？","A：第3步：Isocitrate→α-KG+CO2（異檸檬酸去氫酶）；第4步：α-KG→Succinyl-CoA+CO2（α-KG去氫酶）"],["Q：一分子葡萄糖完全氧化總ATP？","A：糖解（2ATP+2NADH）+丙酮酸→乙醯CoA（2NADH）+TCA×2（6NADH+2FADH2+2GTP）+ETC→共30-32 ATP"],["Q：飲酒如何影響TCA？","A：酒精→大量NADH→TCA受抑制（OAA→Malate）→糖質新生受阻→空腹低血糖；也促進脂肪肝"]],
+          cmp: [["TCA循環（粒線體）","糖質新生（肝腎胞質）"],["分解乙醯CoA產能","以非糖物質合成葡萄糖"],["空腹時被Glucagon抑制","空腹時被Glucagon活化"],["Acetyl-CoA進，OAA再生","OAA出發（需Biotin依賴PC酶）"]],
+          clin: "Wernicke腦病（B1缺乏）：PDH和α-KG去氫酶失活→乳酸↑→神經損傷。三聯症：眼肌麻痹+共濟失調+意識混亂。治療：先靜脈B1，再給糖（順序絕對不能錯！）。",
+          trap: "肝衰竭患者TCA中間物（OAA）不足+血氨↑（抑制α-KG去氫酶）→TCA緩慢→能量不足→肝性腦病；治療：Lactulose降血氨+低蛋白飲食。"
+        },
+        "電子傳遞鏈": {
+          def: "NADH和FADH2在粒線體內膜傳遞電子給O2，推動H+跨膜梯度，驅動ATP合成酶生成大量ATP（氧化磷酸化）。",
+          mech: "Complex I→CoQ→Complex III→Cyt c→Complex IV→H2O；H+梯度→Complex V（ATP synthase）→ATP。NADH→2.5ATP；FADH2→1.5ATP。",
+          mnem: "毒素定位IROAC：Complex I=Rotenone/Amytal；III=Antimycin A；IV=CN-/CO/H2S；V=Oligomycin；Uncoupler（DNP）=繞過ATP synthase產熱不產ATP",
+          exam: ["CN-（氰化物）：Complex IV→ETC停止→乳酸酸中毒；解毒：Hydroxocobalamin+Sodium thiosulfate","CO中毒：Complex IV+Hb（親和力240×O2）→雙重缺氧；解毒：100%O2或高壓氧（HBO）","DNP（解偶聯劑）：H+繞過ATP synthase→產熱↑→體重↓但高熱致死（歷史性減肥藥）","粒線體遺傳：母系遺傳（mtDNA），多系統影響，Ragged red fiber（肌肉切片）"],
+          anki: [["Q：Complex I的抑制劑？","A：Rotenone（農藥）；長期暴露與帕金森症相關（基底核多巴胺神經元敏感）"],["Q：CO中毒SpO2為何正常？","A：Pulse oximeter無法區分HbO2和HbCO；需測SpCO或直接血氣；治療不足→遲發神經毒性（2-3週後）"],["Q：粒線體疾病MELAS？","A：粒線體腦肌病+乳酸酸中毒+腦卒中樣發作；母系遺傳；Ragged red fiber（肌肉切片）"]],
+          cmp: [["氰化物（CN-）中毒","CO中毒"],["Complex IV直接抑制","Complex IV+Hb雙重抑制"],["組織缺O2利用","O2輸送+利用均障礙"],["乳酸酸中毒","乳酸酸中毒+頭痛/意識改變"],["解毒：Hydroxocobalamin","解毒：100%O2/HBO"]],
+          clin: "再灌流損傷（Reperfusion injury）：缺血→ETC停止；再灌流→大量O2+受損ETC→ROS爆發→細胞凋亡/壞死。對策：低溫療法（32-36°C）保護腦；N-acetylcysteine抗氧化。",
+          trap: "CO中毒的SpO2可能正常！（Pulse oximeter無法區分）；需測SpCO或直接血氣（CO-Hb）；治療不足→遲發神經毒性（2-3週後記憶/行為改變）。"
+        }
+      },
+      4: {
+        "alpha 1": {
+          def: "α1受體：Gq蛋白偶聯，分布於血管平滑肌、瞳孔開大肌、攝護腺/膀胱頸。活化→血管收縮、散瞳、攝護腺收縮。",
+          mech: "α1→Gq→PLC→IP3+DAG→Ca2+釋放→平滑肌收縮。血壓↑、散瞳（Mydriasis）、攝護腺/膀胱頸收縮（排尿困難）。",
+          mnem: "α1作用PUMP：Pressure↑（血壓）、Urethral sphincter↑（尿道括約肌）、Mydriasis（散瞳）、Peripheral resistance↑（周邊阻力）",
+          exam: ["α1 agonist：Phenylephrine（升壓、鼻塞）；α1 antagonist：Prazosin/Doxazosin（高血壓+BPH）；Tamsulosin（選擇α1A=BPH首選）","BPH首選：Tamsulosin（α1A）→放鬆攝護腺和膀胱頸→改善排尿；副作用：逆行性射精","嗜鉻細胞瘤術前：先給α-blocker（Phenoxybenzamine），10-14天後才加β-blocker","First-dose effect：Prazosin首劑→體位性低血壓；建議睡前服用"],
+          anki: [["Q：α1 vs α2受體的主要差異？","A：α1（突觸後）→Gq→IP3→Ca2+→收縮；α2（突觸前+後）→Gi→cAMP↓→NE釋放↓（負回饋）；Clonidine（α2 agonist）→中樞降壓"],["Q：Raynaud症候群首選治療？","A：寒冷→α1活化→指端血管痙攣→發白→紫→紅；治療：CCB（Nifedipine）；避免β-blocker（惡化α作用）"],["Q：Phentolamine的適應症？","A：非選擇性α拮抗劑；嗜鉻細胞瘤高血壓危機、外滲血管升壓藥（NE）的局部治療"]],
+          cmp: [["α1 agonist（Phenylephrine）","α2 agonist（Clonidine）"],["血管收縮→血壓↑","抑制NE釋放→血壓↓"],["散瞳（眼科用）","鎮靜（麻醉預用藥）"],["鼻塞血管收縮","ADHD、阿片戒斷"],["副作用：反射性心跳↓","副作用：口乾、嗜睡、停藥反彈高血壓"]],
+          clin: "體位性低血壓（Orthostatic hypotension）：站立時SBP↓>20或DBP↓>10；α1 blocker/利尿劑/抗憂鬱藥常見誘因；老人跌倒主要原因；處理：停藥+彈性襪+Midodrine（α1 agonist）。",
+          trap: "嗜鉻細胞瘤術前處理順序不能錯：先α-blocker（Phenoxybenzamine，非選擇性）→補充血容量（腫瘤切除後會低血壓）→才加β-blocker；若先給β-blocker→反彈性α→BP更高！"
+        },
+        "beta 1": {
+          def: "β1受體：Gs蛋白偶聯，主要在心臟（SA節、心室）和腎臟JGA細胞。活化→心跳↑、心肌收縮力↑、Renin分泌↑。",
+          mech: "β1→Gs→AC→cAMP↑→PKA→磷酸化L型Ca2+通道→Ca2+內流↑→正向肌力；SA節傳導↑→正向頻率；JGA→Renin↑→RAAS。",
+          mnem: "β1作用CRAP：Chronotropy↑（心率）、Renin↑（腎素）、Automaticity↑（自動除極）、Pressure contraction↑（收縮力）。β1=心臟1號受體",
+          exam: ["β1 agonist：Dobutamine（急性心衰竭正性肌力）；Isoproterenol（完全AV block暫時起搏）","選擇性β1 blocker：Metoprolol/Atenolol/Bisoprolol（心衰竭必備，降死亡率30-40%）","β-blocker禁忌：哮喘（非選擇性禁）、完全AV block、心源性休克急性期","β-blocker停藥反應：突然停藥→交感反彈→心絞痛惡化/MI（需1-2週逐漸減量）"],
+          anki: [["Q：Dobutamine vs Dopamine？","A：Dobutamine=純β1（心輸出↑，不升壓）；Dopamine低劑量=DA（腎血流↑）/中劑量=β1/高劑量=α1（升壓）"],["Q：β-blocker在甲狀腺危象的角色？","A：Propranolol（非選擇）：快速控制心跳+抑制T4→T3轉換；同時給PTU+碘化物+類固醇"],["Q：β-blocker在MI後的益處？","A：降低VF（猝死）和心衰竭發生；逆轉心臟重塑+抗心律不整；無禁忌者24h內口服開始"]],
+          cmp: [["Metoprolol（選擇β1）","Carvedilol（α1+β1+β2）"],["選擇性心臟β1","非選擇β+α1拮抗"],["哮喘相對安全","哮喘禁忌"],["不降後負荷","降前後負荷（α1）"],["HFrEF首選之一","HFrEF最佳（也改善血管阻力）"]],
+          clin: "心肌梗塞後β-blocker：無禁忌者24小時內口服（Metoprolol）長期維持→降低猝死（VF）和心衰竭發生率約30-40%。急性心衰竭期（濕冷型）先穩定後才加。",
+          trap: "β-blocker遮蓋低血糖症狀（tremor/tachycardia），但不遮蓋出汗；糖尿病患者更危險；非選擇性（Propranolol）比選擇性（Metoprolol）更嚴重。"
+        },
+        "beta 2": {
+          def: "β2受體：Gs蛋白偶聯，分布在支氣管、骨骼肌血管、子宮、肝臟。活化→支氣管擴張、血管擴張、肝醣分解（升血糖）、子宮鬆弛。",
+          mech: "β2→Gs→cAMP↑→PKA→磷酸化MLCK（失活）→支氣管平滑肌鬆弛。也刺激Na/K-ATPase→K+進細胞→低血鉀。",
+          mnem: "β2作用BLAST：Bronchodilation（支氣管）、Liver glycogenolysis（升血糖）、Anabolism（K+進細胞→低鉀）、Smooth muscle relaxation（子宮/血管）、Tremor（骨骼肌震顫副作用）",
+          exam: ["SABA（Albuterol）=哮喘急救首選；LABA（Salmeterol）=維持（必須與ICS合用！單用增加死亡風險）","Terbutaline（β2）：安胎（Tocolysis）；副作用：心悸、低鉀","哮喘重度：SABA+O2→Ipratropium（M拮抗）+類固醇→MgSO4→ICU","β2大劑量→低鉀→QT延長→心律不整（哮喘猝死機制之一）"],
+          anki: [["Q：SABA vs LABA的比較？","A：SABA（Albuterol）：急性緩解PRN，15分起效4-6h；LABA（Salmeterol）：維持治療，30-60分起效12h；LABA單用→哮喘死亡↑"],["Q：β2為何造成低血鉀？","A：β2→cAMP↑→Na/K-ATPase→K+移入細胞→血鉀↓；哮喘急救大劑量SABA→低鉀→心律不整"],["Q：COPD首選支氣管擴張劑？","A：LAMA（Tiotropium，每日一次）略優於LABA；LAMA+LABA雙支擴>單藥；嚴重→LAMA+LABA+ICS三聯"]],
+          cmp: [["SABA（Salbutamol）","LABA（Salmeterol）"],["急性緩解（PRN）","每日維持治療"],["起效快（5-15分）","起效慢（30-60分）"],["持續4-6h","持續12h"],["可單用","必須與ICS合用（哮喘）"]],
+          clin: "Status asthmaticus（持續性哮喘）：SABA連續使用無效→住院→靜脈MgSO4/Theophylline；極重度：插管（最後手段，氣壓傷風險）；Ketamine（解離型麻醉→支氣管擴張）可用於難治病例。",
+          trap: "高劑量SABA→低鉀（K+進細胞）→QT延長→VT/VF；這也是哮喘急性期猝死機制；補充K+和Mg2+；監測ECG。"
+        }
+      },
+      5: {
+        "T 細胞": {
+          def: "適應性細胞免疫的核心，需要MHC-抗原複合體活化，分為CD4+ helper、CD8+ cytotoxic和Treg等亞型。",
+          mech: "TCR識別MHC+抗原（信號1）+共刺激CD28-B7（信號2）→完全活化；只有信號1→Anergy（無反應/耐受）。",
+          mnem: "MHC規則：MHC I×CD8=8，MHC II×CD4=8（都等於8）。Th亞型：IL-12→Th1（細胞內菌）；IL-4→Th2（過敏/寄生蟲）；IL-6+TGF-β→Th17（胞外菌/真菌）",
+          exam: ["MHC I：所有有核細胞→CD8+細胞毒T識別→殺感染細胞；MHC II：APC→CD4+輔助T識別","HIV：gp120+CD4+CCR5/CXCR4→進入T細胞→CD4<200=AIDS","免疫檢查點：CTLA-4（活化早期抑制）；PD-1+PDL1（效應期抑制）→抑制劑抗癌（Ipilimumab/Nivolumab）","胸腺選擇：正選擇（皮質，MHC識別）→負選擇（髓質，自身抗原→凋亡）→中樞耐受"],
+          anki: [["Q：CTLA-4 vs PD-1的差異？","A：CTLA-4：活化早期競爭CD28-B7；PD-1：效應期腫瘤PDL1抑制T細胞；抑制劑：anti-CTLA-4（Ipilimumab）、anti-PD1（Nivolumab）"],["Q：DiGeorge症候群？","A：22q11.2缺失→胸腺缺失→T細胞↓；CATCH22：心臟缺陷/異常臉/胸腺發育不全/顎裂/低鈣"],["Q：GvHD機制？","A：骨髓移植供者T細胞攻擊宿主；急性（<100天）：皮膚/肝/腸；慢性：類自體免疫；治療：Cyclosporine/Tacrolimus"]],
+          cmp: [["CD4+ Th1","CD4+ Th2"],["IFN-γ（主要）","IL-4/5/13"],["細胞內病原體（結核、病毒）","過敏、寄生蟲（蠕蟲）"],["活化巨噬細胞→殺菌","活化B細胞→IgE"],["Th1↑→抑制Th2","Th2↑→抑制Th1（互制）"]],
+          clin: "Sarcoidosis（結節病）：過度Th1→非乾酪性肉芽腫；ACE↑；高血鈣（granuloma產1,25-OH Vit D）；Lofgren症候群：結節性紅斑+關節炎+肺門淋巴腺腫大=預後好；診斷：排除結核後，肺切片。",
+          trap: "腫瘤免疫逃脫：PDL1過表達→PD1+PDL1→T細胞抑制；Treg在腫瘤微環境→抑制效應T細胞；MMR缺陷腫瘤（dMMR）→更多突變→更多抗原→免疫治療反應最好。"
+        },
+        "抗體系統": {
+          def: "B細胞分化成漿細胞產生五類抗體（IgM/IgG/IgA/IgE/IgD），分別執行初次免疫、長期保護、黏膜防禦、過敏反應和B細胞受體功能。",
+          mech: "B細胞識別抗原+CD4+Th2輔助（IL-4/5/13）→胚中心→親和力成熟（Somatic hypermutation）→類型轉換（Class switching）→漿細胞+記憶B細胞。",
+          mnem: "抗體功能GAMES：IgG（Guard最多穿胎盤）、IgA（Attack黏膜）、IgM（Make first五聚體）、IgE（Eosinophil過敏）、IgD（Display B細胞受體）",
+          exam: ["類型轉換依細胞激素：IL-4→IgE；IL-10→IgG；TGF-β→IgA；需AID（Activation-Induced Cytidine Deaminase）","XLA（Bruton）：BTK突變→前B細胞不成熟→無循環B細胞→5個月後起病（母體IgG消退）","ABO血型：天然抗體是IgM（不穿胎盤）→急性血管內溶血；Rh抗體是IgG（穿胎盤）→新生兒溶血症","Hyper-IgM症候群：CD40L突變→類型轉換失敗→IgM↑但IgG/A/E↓"],
+          anki: [["Q：IgM的結構和功能？","A：五聚體（10個結合位點）；補體活化最強（1個IgM即可）；初次免疫反應最先出現；不穿胎盤"],["Q：sIgA的特點？","A：二聚體+分泌片（J chain+SC）；存在黏膜分泌物（腸/呼吸道/母乳）；阻止病原體黏附；不活化補體"],["Q：Rituximab機制？","A：Anti-CD20→ADCC+CDC殺死B細胞；用於CD20+淋巴瘤/CLL/類風濕/SLE；副作用：PML（JC病毒再活化）"]],
+          cmp: [["IgG","IgM"],["最豐富（75-80%）","初次反應最早出現"],["穿過胎盤","不穿胎盤（分子太大）"],["長效記憶（月）","短效（週消退）"],["補體活化中等","最強補體活化（1個即可）"]],
+          clin: "Multiple Myeloma（多發性骨髓瘤）：惡性漿細胞→M蛋白；CRAB：高Ca/腎衰竭/貧血/骨痛；Bence Jones protein（輕鏈尿）；治療：Bortezomib（蛋白酶體抑制劑）+Dexamethasone。",
+          trap: "ABO不合輸血（急性血管內溶血）：發燒/寒顫/腰背痛/血紅素尿/DIC；立即停止輸血+大量補液+Furosemide保護腎臟；最常見原因：護理人員標籤錯誤（人為失誤）。"
+        }
+      },
+      6: {
+        "糖尿病地圖": {
+          def: "以慢性高血糖為特徵的代謝疾病，由胰島素分泌不足和/或胰島素阻抗引起，最終導致多器官血管病變。",
+          mech: "T1DM：自身免疫（GAD抗體）→β細胞破壞→胰島素完全缺乏；T2DM：胰島素阻抗→β細胞代償→β細胞衰竭→相對不足。",
+          mnem: "DM三大微血管病變3Rs：Retinopathy（視網膜=失明首因）、Renal（腎病=ESRD首因）、neuropathy（神經=截肢首因）。大血管：MI/Stroke/PAD",
+          exam: ["診斷標準：FPG>=126/2hOGTT>=200/HbA1c>=6.5%/隨機>=200+症狀（符合一項）","T2DM：Metformin→SGLT2i（心腎保護）→GLP-1RA（降體重）→基礎胰島素","DM視網膜：NPDR（微動脈瘤/棉絮斑）→PDR（新生血管）→玻璃體出血→失明","DM腎病：正常→微量蛋白尿→大量蛋白尿→eGFR↓→ESRD；ACEI/ARB+SGLT2i保護"],
+          anki: [["Q：SGLT2i的腎保護機制？","A：腎小球過度濾過（Hyperfiltration）降低→腎小球壓力↓；也降BP/體重/尿酸；Empagliflozin、Dapagliflozin"],["Q：DM神經病變的特徵？","A：遠端對稱型（最常見）：手套長襪型感覺喪失；自律神經：體位性低血壓/胃輕癱/膀胱失功能"],["Q：Charcot關節的特徵？","A：感覺神經病變→反覆外傷→關節破壞；X光：Bag of bones；好發：足部MTP關節；防止：足部保護"]],
+          cmp: [["T1DM","T2DM"],["自身免疫（GAD/IA2抗體）","胰島素阻抗+相對不足"],["突發（兒童/青年）","漸進（成年，BMI↑）"],["DKA傾向","HHS傾向"],["必須胰島素","生活方式+口服藥→再胰島素"]],
+          clin: "DM足部照護：每次就診查足部（視覺+感覺+血管）；10g monofilament測感覺；ABI評估血管；Wagner分級1-5；糖尿病足感染常見混合菌，Pseudomonas+厭氧菌→廣效抗生素。",
+          trap: "正常血糖DKA（Euglycemic DKA）：SGLT2i相關；血糖可能只有180-200；但酮酸中毒仍存在；術前停SGLT2i 3-4天；診斷：不要因血糖不高就排除DKA！"
+        },
+        "高血壓地圖": {
+          def: "持續BP>=140/90mmHg（傳統），長期造成心腦腎眼血管靶器官損傷。原發性95%，繼發性5%。",
+          mech: "原發性：遺傳+環境（高鈉/肥胖/壓力）→RAAS↑+交感→TPR↑+腎排鈉障礙；繼發性：特定可治療病因（5A）。",
+          mnem: "繼發性高血壓5A：Aldosteronism（原發醛固酮增多症）、Artery（腎動脈狹窄）、Apnea（睡眠呼吸中止-最常見！）、Adrenergic（嗜鉻細胞瘤）、Abuse（口服避孕藥/NSAID/可卡因）",
+          exam: ["靶器官損傷：LVH→心衰竭；腔隙性梗塞→血管性失智；腎小動脈硬化→CKD；KW Grade I-IV（眼底）","降壓藥：DM腎病→ACEI/ARB；老人→CCB/Thiazide；心衰→ACEI+β-blocker；妊娠→Labetalol/Methyldopa","高血壓急症：靜脈Labetalol/Nicardipine，1小時降20-25%（禁止過快降至正常！）","難治性（3種藥最大劑量仍高）：排除睡眠呼吸中止→加Spironolactone（最有效）"],
+          anki: [["Q：原發醛固酮增多症診斷步驟？","A：低K+高血壓→ARR>30（篩查）→Fludrocortisone抑制試驗（確認）→CT（定位）→單側腺瘤手術；雙側增生→Spironolactone"],["Q：嗜鉻細胞瘤術前準備？","A：先α-blocker（Phenoxybenzamine）10-14天→補充血容量→才加β-blocker；禁止先β→反彈性高血壓更危險"],["Q：Methyldopa機制和用途？","A：α2 agonist（中樞）→減少交感；妊娠高血壓首選（安全性最高）；副作用：Coombs陽性溶血性貧血（罕見）"]],
+          cmp: [["高血壓急症（Emergency）","高血壓緊急（Urgency）"],["BP↑+靶器官損傷","BP↑，無靶器官損傷"],["靜脈降壓，1h降20-25%","口服降壓，24-48h緩慢降"],["住院ICU","可門診處理"],["Labetalol/Nicardipine靜脈","Captopril/Clonidine口服"]],
+          clin: "主動脈剝離：A型（升主動脈）=手術急症；B型（降主動脈）=藥物（β-blocker+Nitroprusside降至SBP<120/HR<60）；目標：降低主動脈壁剪切力。",
+          trap: "高血壓患者腦中風後降壓：缺血性中風後24小時內，除非BP>220/120或要溶栓（>185/110），否則不積極降壓；自動調控上移→過早降壓→梗塞擴大。"
+        },
+        "心衰竭地圖": {
+          def: "心臟無法提供組織代謝所需的血液。HFrEF（EF<40%，收縮衰竭）vs HFpEF（EF>=50%，舒張衰竭）。",
+          mech: "CO不足→RAAS↑+交感↑→心臟重塑（肥大/纖維化）→惡性循環；HFrEF：收縮功能↓；HFpEF：心室僵硬，舒張充盈障礙。",
+          mnem: "HFrEF四大降死亡率藥物ABMS：ACEI/ARB/ARNI（A）、β-blocker（B）、MRA-Spironolactone（M）、SGLT2i（S）。口訣：A Beautiful Medicine Strategy",
+          exam: ["NYHA分級：I（無症狀）/II（輕度活動限制）/III（明顯限制）/IV（休息也有症狀）","急性心衰竭LMNOP：Lasix（Furosemide）、Morphine（靜脈擴張）、Nitrates、O2、Position（坐起）","BNP/NT-proBNP：BNP>400=高度懷疑；<100=基本排除；中間：其他診斷工具","CRT適應症：QRS>150ms+EF<35%→CRT+ICD（雙心室起搏+除顫）"],
+          anki: [["Q：HFrEF vs HFpEF的治療差異？","A：HFrEF：ABMS降死亡率；HFpEF：SGLT2i（Empagliflozin）有效，其他藥效果有限"],["Q：Dobutamine在急性心衰竭的角色？","A：純β1激動劑→心輸出量↑不升壓；用於低灌流（低BP+低CO）型心衰竭；非橋接移植禁用"],["Q：Hydralazine+Nitrate的適應症？","A：非裔美國人HFrEF患者ACEI/ARB效果↓；或ACEI/ARB不耐受（高鉀/腎衰竭）的替代"]],
+          cmp: [["HFrEF（收縮衰竭）","HFpEF（舒張衰竭）"],["EF<40%","EF>=50%"],["收縮功能↓（心肌梗塞/擴張性）","舒張功能↓（高血壓/肥胖/DM）"],["ABMS均降死亡率","SGLT2i有效；其他效果有限"],["心室擴大","心室壁增厚，腔小"]],
+          clin: "急性肺水腫急救LMNOP：Lasix（Furosemide）、Morphine（靜脈擴張+鎮靜）、Nitrates（硝酸鹽降前後負荷）、O2、Position（坐起降前負荷）。",
+          trap: "心衰竭患者用NSAID：拮抗前列腺素→水鈉滯留→心衰竭惡化+腎功能損傷；也干擾ACEI效果；心衰竭患者絕對避免；如必要短期可用Acetaminophen代替止痛。"
+        }
+      }
+    };
+
+    function makeNodeHTML(node, data) {
+      // Each section inside the node is its own collapsible <details>
+      const examHTML = (data.exam || []).map(e => `<div class="exam-pill">${e}</div>`).join('');
+      const ankiHTML = (data.anki || []).map(([q,a]) =>
+        `<div class="anki-c"><div class="anki-q">${q}</div><div class="anki-a">${a}</div></div>`
+      ).join('');
+      const cmpHTML = data.cmp ? (() => {
+        const [head, ...rows] = data.cmp;
+        return `<table class="cmp-tbl"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+      })() : '';
+
+      const sections = [
+        { icon: '📌', label: '定義', html: `<div class="sec-content">${data.def || ''}</div>` },
+        { icon: '⚙️', label: '機制', html: `<div class="sec-content">${data.mech || ''}</div>` },
+        { icon: '🎯', label: '口訣', html: `<div class="mnem-box"><b>背誦口訣</b>${data.mnem || ''}</div>` },
+        { icon: '📋', label: '國考考點', html: `<div class="sec-content">${examHTML}</div>` },
+        ...(ankiHTML ? [{ icon: '🃏', label: 'Anki 卡片', html: `<div class="anki-wrap">${ankiHTML}</div>` }] : []),
+        ...(cmpHTML ? [{ icon: '⚖️', label: '比較表', html: cmpHTML }] : []),
+        { icon: '🏥', label: '臨床應用', html: `<div class="info-box"><b>臨床應用</b>${data.clin || ''}</div>` },
+        { icon: '⚠️', label: '考試陷阱', html: `<div class="warn-box"><b>常見錯誤</b>${data.trap || ''}</div>` },
+      ];
+
+      const sectionsHTML = sections.map(s => `
+        <details class="item-details">
+          <summary class="item-sum">
+            <span class="item-icon">${s.icon}</span>
+            <span class="item-label">${s.label}</span>
+            <span class="item-arr">&#9658;</span>
+          </summary>
+          <div class="item-body">${s.html}</div>
+        </details>`).join('');
+
+      return `<details class="node-details">
+        <summary class="node-sum">
+          <span class="sum-badge">⚡</span>
+          <span>${node}</span>
+          <span class="sum-arr">&#9658;</span>
+        </summary>
+        <div class="node-body">${sectionsHTML}</div>
+      </details>`;
+    }
+
+    function renderNodeExpansion(map, mapIndex) {
+      const db = nodeDatabase[mapIndex] || {};
+      return `<div class="node-expansion-grid">${map.nodes.map(node => {
+        if (db[node]) return makeNodeHTML(node, db[node]);
+        const item = expandNode(map, mapIndex, node);
+        const fallbackSections = [
+          { icon: '📌', label: '定位', html: item.define },
+          { icon: '✅', label: '必會', html: item.must },
+          { icon: '📋', label: '考法', html: item.exam },
+          { icon: '🏥', label: '臨床', html: item.clinical },
+          { icon: '⚠️', label: '錯誤', html: item.mistake },
+          { icon: '🎯', label: '任務', html: item.task },
+        ];
+        const fallbackHTML = fallbackSections.map(s => `
+          <details class="item-details">
+            <summary class="item-sum">
+              <span class="item-icon">${s.icon}</span>
+              <span class="item-label">${s.label}</span>
+              <span class="item-arr">&#9658;</span>
+            </summary>
+            <div class="item-body"><div class="sec-content">${s.html}</div></div>
+          </details>`).join('');
+        return `<details class="node-details">
+          <summary class="node-sum">
+            <span class="sum-badge">⚡</span>
+            <span>${node}</span>
+            <span class="sum-arr">&#9658;</span>
+          </summary>
+          <div class="node-body">${fallbackHTML}</div>
+        </details>`;
+      }).join('')}</div>`;
+    }
+
+
+
+    const aiFunctions = [
+      ["AI 白話翻譯", "專業變白話", "快速理解"],
+      ["AI 心智圖", "知識視覺化", "建立架構"],
+      ["AI 九宮格", "重點濃縮", "快速複習"],
+      ["AI 流程圖", "建立因果鏈", "系統理解"],
+      ["AI 動畫", "動態學習", "強化記憶"],
+      ["AI-Anki", "自動出卡", "長期記憶"],
+      ["AI 測驗", "即時驗證", "找出漏洞"],
+      ["AI 病人", "臨床模擬", "推理能力"],
+      ["AI 國考教練", "學習導航", "提升分數"],
+      ["AI 錯題分析", "誤差修正", "快速進步"],
+      ["AI 讀書計畫", "個人化排程", "效率最大化"],
+      ["AI 主治醫師", "決策訓練", "醫師思維"]
+    ];
+
+    const aiManual = [
+      {
+        name: "AI 白話翻譯",
+        icon: "🗣️",
+        tagline: "把課本語言翻成你能說出口的話",
+        concrete: "把「腎前性氮質血症」翻成：腎臟沒壞，只是血沒打到它，補水就好了",
+        demo: "輸入：「異檸檬酸去氫酶受NADH抑制」→ 輸出：「電池夠了就不再充電，TCA循環踩剎車」",
+        howto: "複製那段你看三遍還沒懂的句子，問AI：「用我送外賣的朋友也聽得懂的方式解釋」",
+        unique: "不是縮短，是換語言。翻完再問AI幫你還原成考試用語，建立雙語記憶"
+      },
+      {
+        name: "AI 心智圖",
+        icon: "🗺️",
+        tagline: "讓你知道哪個知識掛在哪裡",
+        concrete: "把高血壓的12個考點整理成：病因→機制→靶器官→藥物→陷阱，一張樹狀圖",
+        demo: "輸入「高血壓」→ 輸出：中心節點往外8條：定義/分類/病因/機制/靶器官/藥物/急症/特殊族群",
+        howto: "每讀完一章，輸入章節名，要AI畫文字心智圖，再和課本對照看自己漏了哪個分支",
+        unique: "和九宮格不同：心智圖是無限延伸，適合整理「這個主題我還有哪些不知道」"
+      },
+      {
+        name: "AI 九宮格",
+        icon: "⬛",
+        tagline: "強迫大腦只記最重要的9格",
+        concrete: "COPD九宮格：中心=COPD，四角=病因/機制/診斷/治療，四邊=症狀/分期/急性惡化/國考陷阱",
+        demo: "輸入「幫我做COPD九宮格，四角是病因機制診斷治療」→ 直接得到9格可背誦摘要",
+        howto: "考前一週，每天做3個疾病的九宮格，用手機拍下來當通勤複習",
+        unique: "和心智圖不同：格子強迫你只能填最重要的，不能無限延伸，適合考前壓縮"
+      },
+      {
+        name: "AI 流程圖",
+        icon: "➡️",
+        tagline: "把因果和決策變成一條線",
+        concrete: "胸痛流程：到急診→ECG→ST↑？→是→STEMI→PCI；不是→Troponin→NSTEMI or UA",
+        demo: "輸入「幫我畫胸痛急診處置流程，從到急診到決定治療」→ 得到帶分支條件的決策樹",
+        howto: "遇到「下一步要做什麼」的題型就用這個，把你的思路輸入，讓AI補你漏掉的分支",
+        unique: "和心智圖不同：流程圖有方向和條件，適合生理機制鏈、急症決策、病理進展時序"
+      },
+      {
+        name: "AI 動畫腳本",
+        icon: "🎬",
+        tagline: "把靜態知識拆成有順序的畫面",
+        concrete: "RAAS六格腳本：格1血壓↓→格2腎感知→格3Renin釋放→格4Ang II→格5Aldo→格6血壓↑",
+        demo: "輸入「把DKA發生過程做成6格動畫腳本，我要記住順序」→ 每格一句話+一個關鍵數值",
+        howto: "代謝路徑、免疫活化、胚胎發育這類「有時間順序」的內容，一定用這個方法拆",
+        unique: "重點是「每格只放一個變化」，學完再合起來看，時間軸自然就記住了"
+      },
+      {
+        name: "AI Anki 生成",
+        icon: "🃏",
+        tagline: "把今天看懂的變成30天後還記得的",
+        concrete: "β-blocker十張卡：卡1問受體類型→答案；卡2問哪個選擇性β1→列表；卡3問氣喘能不能用非選擇→禁忌",
+        demo: "輸入「幫我把ACE inhibitor做成8張Anki，包含機制/適應症/副作用/禁忌/和ARB比較」",
+        howto: "每讀完一個藥理機制立刻做卡，不要等到複習期，趁還記得時做最省力",
+        unique: "和單純背不同：好的Anki卡是問「為什麼」不是「是什麼」，讓你每次復習都在重建推理"
+      },
+      {
+        name: "AI 測驗出題",
+        icon: "📝",
+        tagline: "馬上知道你是真的懂還是覺得懂",
+        concrete: "讀完酸鹼平衡後問AI：「出5題，要有ABG數值判讀、代償計算、最可能病因，每題要解釋選項」",
+        demo: "輸入「針對我剛學完的糖解作用出4題，第4題要是臨床應用型」→ 馬上得到4題+詳解",
+        howto: "每個模型讀完出3-5題，錯了的才去重讀，對了的繼續往下，不要重讀已經懂的",
+        unique: "和看習題不同：你可以指定難度、題型、臨床場景，讓出題精準打在你的弱點上"
+      },
+      {
+        name: "AI 病人模擬",
+        icon: "🏥",
+        tagline: "讓知識在問診中變成你的直覺",
+        concrete: "「你是65歲喘的男性，我來問診，你的答案要讓我能鑑別COPD vs 心衰竭 vs 肺炎」",
+        demo: "你問「你喘多久了」→AI答「三天，之前就一直有點喘，這次突然很嚴重」→ 你繼續問症狀",
+        howto: "每個器官系統學完後各做一次，每次讓AI扮演不同年齡性別，讓鑑別診斷內化",
+        unique: "和看病例不同：你是主動的，你問什麼AI才給什麼線索，訓練的是問題選擇能力"
+      },
+      {
+        name: "AI 國考教練",
+        icon: "🎯",
+        tagline: "每次做題後讓AI告訴你下一步讀什麼",
+        concrete: "貼上錯題「答案是A我選B」→AI分析：你混淆了腎前性和腎性AKI的尿Na判斷，建議複習這個節點",
+        demo: "輸入「我這週藥理錯了這5題：（貼題）請分析我的弱點並排出下週複習優先順序」",
+        howto: "不要等到最後衝刺才找教練，每兩週做一次弱點盤點，讓AI幫你決定時間分配",
+        unique: "和題庫系統不同：AI可以解釋「你這個錯誤的思路是從哪個錯誤前提出發的」"
+      },
+      {
+        name: "AI 錯題解析",
+        icon: "🔍",
+        tagline: "不是告訴你答案，而是告訴你為什麼你會這樣想",
+        concrete: "貼上「我選C因為我以為β-blocker都能用在心衰竭」→AI：急性失代償心衰竭不能用，穩定後才加",
+        demo: "輸入「我選A但答案是C，我的想法是XXX，請告訴我我哪一步推理錯了」",
+        howto: "做錯題不是看解答就過，要把你的思路寫出來讓AI找到斷點，這才是修正",
+        unique: "和看解析書不同：你把你錯誤的思路輸入，AI才能指出你的「邏輯斷點」在哪"
+      },
+      {
+        name: "AI 讀書計畫",
+        icon: "📅",
+        tagline: "把剩下的時間和剩下的內容自動配對",
+        concrete: "輸入「距離考試40天，我生化最弱、藥理中等、病理已讀，幫我排每天的內容」",
+        demo: "輸入現況→AI輸出：第1-2週攻生化TCA+代謝；第3週藥理心血管；第4-5週病理+整合模擬",
+        howto: "每週日晚上重新輸入本週進度和錯題，讓AI調整下週計畫，不要讓計畫變一張廢紙",
+        unique: "和時間表不同：計畫要隨著你的實際進度每週更新，AI幫你做動態調整"
+      },
+      {
+        name: "AI 主治醫師",
+        icon: "🩺",
+        tagline: "訓練你在不確定中做出最好的決策",
+        concrete: "「你是心臟科主治，我是實習醫師，我剛看了一個ST上升的病人，你問我下一步」",
+        demo: "AI問「你看到ECG了，你說ST↑在V1-V4，你要做什麼」→ 你回答→AI評分並給出更好的思路",
+        howto: "用這個功能練習「口頭報告+被追問」，讓你在見習前就習慣被問下去的壓力",
+        unique: "和AI病人不同：主治醫師角色是來考你的，訓練的是你在壓力下的臨床推理速度"
+      }
+    ];
+
+    const learningLoop = [
+      ["AI 地圖生成", "先做出整體骨架"],
+      ["AI 白話解釋", "把陌生概念轉成可理解語言"],
+      ["AI 心智圖", "把知識節點放回架構"],
+      ["AI 動畫化", "把因果與時間順序動起來"],
+      ["AI-Anki", "把模型轉成長期記憶"],
+      ["AI 測驗", "即時驗證漏洞"],
+      ["AI 病例推理", "把知識推進臨床情境"],
+      ["AI 模擬國考", "轉成題幹與選項判斷"],
+      ["AI 錯題分析", "定位誤差來源"],
+      ["AI 弱點修正", "回補地圖節點"],
+      ["模型升級", "讓 12 個模型越來越穩"],
+      ["國考通過與臨床勝任", "從考試能力走向醫師思維"]
+    ];
+
+    const loopManual = [
+      {
+        name: "AI 地圖生成",
+        purpose: "把一個章節、疾病、藥物或錯題先掛到 12 OS 的其中一張地圖，避免知識一開始就散掉。",
+        input: "主題名稱、課本段落、老師投影片、錯題題幹、臨床病例或國考高頻考點。",
+        aiAction: "判斷此主題屬於哪個 OS，產生核心節點、上下游因果、國考入口與臨床應用。",
+        userAction: "檢查 AI 分類是否正確，補上自己課堂中特別強調的內容，刪掉不相關分支。",
+        output: "一張初版地圖：主題、核心節點、推理鏈、考點、臨床連結。",
+        validation: "能用 60 秒說出這個主題屬於哪個 OS，以及為什麼。",
+        returnsTo: "回流到 12 OS 全量內容展開，補進對應節點。"
+      },
+      {
+        name: "AI 白話解釋",
+        purpose: "把抽象、陌生、看似很硬的醫學概念轉成真正能理解的語言。",
+        input: "難懂名詞、機制段落、病理描述、藥理作用、檢查結果或老師口頭補充。",
+        aiAction: "產生三層解釋：小白版、醫學生版、國考版，並保留正式術語。",
+        userAction: "用自己的話重講一次，找出仍卡住的詞，要求 AI 再舉例或畫比喻。",
+        output: "白話定義、正式定義、臨床例子、可背誦一句話。",
+        validation: "能不用看筆記向同學解釋，且能回到正式醫學名詞。",
+        returnsTo: "回流到核心概念完整展開與 AI-Anki。"
+      },
+      {
+        name: "AI 心智圖",
+        purpose: "把理解過的內容放成樹狀架構，知道每個子知識要掛在哪裡。",
+        input: "一個 OS、一個疾病、一類藥物、一個生理機制或一組錯題。",
+        aiAction: "建立中心主題、第一層分類、第二層節點、高頻考點、弱點節點。",
+        userAction: "把心智圖和 12 OS 對齊，檢查是否有分類錯誤或漏掉國考高頻枝幹。",
+        output: "心智圖、節點清單、強弱分支、複習優先順序。",
+        validation: "能從中心主題一路講到末端節點，且不迷路。",
+        returnsTo: "回流到每個節點最大化展開。"
+      },
+      {
+        name: "AI 動畫化",
+        purpose: "把時間、流程、代謝、免疫、發育、疾病進展變成動態序列。",
+        input: "代謝路徑、血壓調控、免疫反應、妊娠週數、疾病生命史或外科決策。",
+        aiAction: "拆成 4 到 8 個畫面，標出每格變化、旁白、考點暫停點與常見錯誤。",
+        userAction: "按順序重講動畫，確認每一步的原因與結果，不能只背畫面。",
+        output: "分鏡腳本、時間軸、流程旁白、動畫式記憶卡。",
+        validation: "能打亂步驟後重新排回正確順序，並解釋每個箭頭。",
+        returnsTo: "回流到因果鏈 / 推理鏈。"
+      },
+      {
+        name: "AI-Anki",
+        purpose: "把理解內容轉成長期記憶，防止學完三天後消失。",
+        input: "核心概念、推理鏈、比較表、錯題原因、臨床決策或國考陷阱。",
+        aiAction: "產生 Q/A 卡、cloze 卡、比較卡、病例卡、圖像提示卡與複習標籤。",
+        userAction: "刪掉太簡單或太長的卡，改成自己會被問倒的形式。",
+        output: "可複習卡片組，依 OS、節點、弱點、考點標籤化。",
+        validation: "看到卡片能主動回憶，不只是認得答案。",
+        returnsTo: "回流到熟習任務與驗收內容。"
+      },
+      {
+        name: "AI 測驗",
+        purpose: "立刻檢查是不是真的會，不讓熟悉感假裝成能力。",
+        input: "剛學完的 OS、節點、疾病、藥物、錯題主題或弱點清單。",
+        aiAction: "產生基礎題、整合題、病例題與陷阱題，並逐選項解析。",
+        userAction: "先作答再看解析，標記錯因是知識點、節點、模型、推理或決策。",
+        output: "測驗分數、錯題清單、弱點節點、下一輪複習任務。",
+        validation: "同主題換題幹仍能答對，且能說明錯選項為何錯。",
+        returnsTo: "回流到 AI 錯題分析。"
+      },
+      {
+        name: "AI 病例推理",
+        purpose: "把知識推進臨床場景，訓練從主訴到診斷與處置的完整推理。",
+        input: "主訴、年齡、性別、生命徵象、檢查、影像、病史或模擬病人。",
+        aiAction: "扮演病人或主治醫師，逐步提供線索，追問鑑別診斷與下一步處置。",
+        userAction: "主動問診、提出假設、要求檢查、解釋結果、做出安全決策。",
+        output: "問診紀錄、鑑別診斷、檢查計畫、處置理由、臨床推理回饋。",
+        validation: "能說出不能漏掉的危險診斷與下一步最安全處置。",
+        returnsTo: "回流到疾病地圖 OS、決策樹 OS 與各專科 OS。"
+      },
+      {
+        name: "AI 模擬國考",
+        purpose: "把模型轉成考試表現，練習題幹辨識、選項排除與時間壓力。",
+        input: "指定 OS、國考科目、難度、題數、歷屆題型或弱點主題。",
+        aiAction: "生成國考風格題幹、五選一選項、解析、陷阱與對應模型節點。",
+        userAction: "限時作答，標出題幹關鍵字，寫下選與不選的理由。",
+        output: "模擬考卷、解析、分數、題幹線索表、選項陷阱表。",
+        validation: "不只答對，還能指出每個選項對應哪個節點或錯誤概念。",
+        returnsTo: "回流到國考模式與 AI 國考教練。"
+      },
+      {
+        name: "AI 錯題分析",
+        purpose: "把錯題拆成可修正的錯因，不讓同一類錯誤重複出現。",
+        input: "題目、自己的答案、正解、解析、當時想法與相關 OS。",
+        aiAction: "判斷錯因層級，定位到 OS、節點、推理鏈或決策流程。",
+        userAction: "確認錯因是否準確，補一段自己的錯誤描述，生成修正任務。",
+        output: "錯因分類、弱點節點、修正筆記、Anki 卡、重測題。",
+        validation: "下次遇到同型題能先啟動模型，而不是回想答案位置。",
+        returnsTo: "回流到每個節點最大化展開與熟習任務最大化展開。"
+      },
+      {
+        name: "AI 弱點修正",
+        purpose: "把錯題分析後的弱點補回模型，讓 12 OS 越練越完整。",
+        input: "錯因報告、低分科目、反覆錯的節點、模擬考弱點。",
+        aiAction: "安排補強順序，產生微課程、對比表、重測題與間隔複習。",
+        userAction: "完成補強任務，重做相似題，更新熟習度勾選。",
+        output: "弱點修正清單、補強教材、重測結果、熟習度更新。",
+        validation: "同一弱點連續兩次重測達標，且能口頭解釋錯因已修正。",
+        returnsTo: "回流到核心模型熟習訓練室。"
+      },
+      {
+        name: "模型升級",
+        purpose: "把零散修正整合回模型，讓每張 OS 從粗略骨架變成個人化知識網。",
+        input: "新增筆記、錯題修正、臨床病例、老師補充、模擬考結果。",
+        aiAction: "合併重複節點，補缺失連結，更新高頻考點與臨床應用。",
+        userAction: "確認新版模型是否更清楚，刪掉低價值資訊，保留高頻與高風險內容。",
+        output: "升級版 OS、個人弱點標籤、最終複習版地圖。",
+        validation: "能用新版模型解釋更多題目，且模型不變亂、不變胖。",
+        returnsTo: "回流到 12 OS 全量內容展開。"
+      },
+      {
+        name: "國考通過與臨床勝任",
+        purpose: "把考試能力與臨床能力接起來：不只會選答案，也能解釋病人與做決策。",
+        input: "12 OS 完成度、模擬考分數、錯題回收率、病例推理表現。",
+        aiAction: "整合能力雷達，指出最後衝刺重點，安排國考與臨床雙軌任務。",
+        userAction: "依弱點做最後複習，維持 Anki，持續病例推理與模擬考。",
+        output: "通過策略、臨床能力清單、最後衝刺計畫、醫師思維框架。",
+        validation: "能在國考題、PBL 病例、臨床情境中穩定啟動 12 OS。",
+        returnsTo: "回流到整個 Medical Map Master OS，形成下一輪精熟循環。"
+      }
+    ];
+
+    const palettes = ["#2563eb", "#0891b2", "#15966b", "#b7791f", "#dc3f4d", "#7556d9", "#0f766e", "#be4b77", "#9333ea", "#ea580c", "#4f46e5", "#64748b"];
+    let selected = 0;
+    let aiMode = "disease";
+
+    const osStudyLens = [
+      {
+        define: "把此節點放回身體三維座標，確認位置、相鄰構造、血管神經供應與功能。",
+        must: "要能畫出位置，說明支配或供血，並從受傷位置反推症狀。",
+        exam: "常以圖片標示、神經損傷、血管阻塞、器官相鄰關係與病灶定位出題。",
+        clinical: "用於影像判讀、理學檢查定位、手術風險與症狀病灶反推。",
+        mistake: "只背名稱，沒有空間位置與臨床後果。"
+      },
+      {
+        define: "把此節點視為控制系統的一段，找出輸入、感受器、控制中心、效應器與回饋。",
+        must: "要能說出刺激上升或下降時，身體如何補償，以及補償失敗會造成什麼。",
+        exam: "常以數值變化、荷爾蒙變化、酸鹼電解質、代償方向與控制迴路出題。",
+        clinical: "用於判讀生命徵象、抽血數據、休克、內分泌與腎臟補償。",
+        mistake: "把代償反應當成原發病因，或只背單一荷爾蒙。"
+      },
+      {
+        define: "把此節點放進能量、碳流與還原力流，判斷它在哪個營養狀態被啟動。",
+        must: "要能說出入口、出口、限速步驟、能量收益與相關器官。",
+        exam: "常考酵素缺陷、飢餓/進食切換、ATP 產量、乳酸、酮體與粒線體。",
+        clinical: "用於解釋低血糖、酮酸中毒、乳酸酸中毒、肝病與代謝缺陷。",
+        mistake: "只背路徑圖，沒有連到狀態切換與臨床表現。"
+      },
+      {
+        define: "把此節點視為細胞或組織面對傷害後的一種反應或結局。",
+        must: "要能分辨刺激、細胞反應、顯微變化、肉眼變化與器官功能後果。",
+        exam: "常考適應、壞死型態、發炎細胞、修復纖維化與腫瘤特徵。",
+        clinical: "用於解釋症狀來源、檢查異常、病程時間序與併發症。",
+        mistake: "背病理名詞但不會推病程與器官功能。"
+      },
+      {
+        define: "把此節點視為藥物作用入口，確認受體位置、訊號與器官反應。",
+        must: "要能連出 agonist/antagonist、主要藥物、治療用途、副作用與禁忌。",
+        exam: "常以藥物選擇、副作用、禁忌、交感副交感與受體分布出題。",
+        clinical: "用於選藥、預測副作用、避開禁忌與解釋病人症狀。",
+        mistake: "只背藥名，不知道受體在哪裡、為何有效。"
+      },
+      {
+        define: "把此節點放進免疫軍隊，確認它是偵查、攻擊、指揮、記憶或清除哪一段。",
+        must: "要能說出辨識對象、活化方式、主要分泌物、合作細胞與疾病連結。",
+        exam: "常考 MHC、T/B 細胞、抗體、補體、過敏、自體免疫與免疫缺陷。",
+        clinical: "用於判斷感染型態、疫苗效果、免疫缺陷、過敏與自體免疫。",
+        mistake: "混淆先天/後天、體液/細胞免疫、MHC I/II。"
+      },
+      {
+        define: "把此節點放入疾病生命史，確認它在病因、病理、症狀、檢查、診斷、治療或預後哪一段。",
+        must: "要能由上一段推下一段，並能回推題幹線索為何支持診斷。",
+        exam: "常考下一步檢查、最佳治療、併發症、危險因子與急慢性處置。",
+        clinical: "用於建立鑑別診斷、安排檢查、解釋治療與追蹤預後。",
+        mistake: "直接背診斷或治療，沒有疾病因果鏈。"
+      },
+      {
+        define: "把此節點放入外科決策樹，確認它如何影響下一步檢查、處置或手術。",
+        must: "要能判斷病人穩定度、手術適應症、禁忌、風險與術後照護。",
+        exam: "常考急腹症、創傷、影像選擇、手術時機與術後併發症。",
+        clinical: "用於急診分流、手術決策、術前評估與術後監測。",
+        mistake: "只想診斷，不知道下一步處置與安全優先順序。"
+      },
+      {
+        define: "把此節點放在妊娠週數上，確認母體、胎兒、胎盤與檢查決策如何隨時間改變。",
+        must: "要能說出該週數或主題的發育重點、篩檢、風險與處置。",
+        exam: "常考週數、產前篩檢、妊娠疾病、出血、早產與分娩處置。",
+        clinical: "用於產檢規劃、母胎風險評估、急症處理與分娩決策。",
+        mistake: "不先定位週數就判斷疾病或處置。"
+      },
+      {
+        define: "把此節點放在兒童年齡軸上，確認該年齡應有能力、變異範圍與紅旗。",
+        must: "要能說出正常里程碑、延遲警訊、評估方式與疫苗連結。",
+        exam: "常考發展里程碑、疫苗時程、發展遲緩、聽力語言與自閉症警訊。",
+        clinical: "用於兒童健檢、家長衛教、轉介判斷與早期介入。",
+        mistake: "只背單一年齡點，沒有連續發展軸。"
+      },
+      {
+        define: "把此節點放進神經傳導物質與腦網路，確認它影響情緒、思考、注意力或行為哪一段。",
+        must: "要能連到症狀群、診斷標準、藥物機制、副作用與安全評估。",
+        exam: "常考憂鬱、焦慮、思覺失調、ADHD、雙相、藥物副作用與自殺風險。",
+        clinical: "用於精神科鑑別、危險評估、用藥選擇與心理社會介入。",
+        mistake: "只看單一症狀，忽略時間、功能受損與排除物質/身體病。"
+      },
+      {
+        define: "把此節點放入風險矩陣，確認它如何改變疾病機率、篩檢策略與追蹤密度。",
+        must: "要能說出可改變/不可改變風險、相關疾病、篩檢與介入。",
+        exam: "常考心血管風險、癌症篩檢、三高管理、戒菸減重與預防層級。",
+        clinical: "用於健康檢查、慢性病追蹤、篩檢建議與生活型態管理。",
+        mistake: "只看單一數值，不整合整體風險與病人可行性。"
+      }
+    ];
+
+    function expandNode(map, mapIndex, node) {
+      const lens = osStudyLens[mapIndex];
+      return {
+        node,
+        define: `${node}：${lens.define}`,
+        must: lens.must,
+        exam: `${lens.exam} 讀到 ${node} 時，要能回答「它在 ${map.title} 的哪一段？會怎麼被考？」`,
+        clinical: lens.clinical,
+        mistake: lens.mistake,
+        task: `用 3 分鐘完成：定義 ${node}、畫出它和前後節點的關係、寫 1 張 Anki、出 1 題國考式題幹。`
+      };
+    }
+
+
+
+    function renderMaxTasks(map) {
+      return `
+        <div class="max-task-grid">
+          ${map.drills.map((task, index) => `
+            <article class="max-task-card">
+              <strong>任務 ${index + 1}｜${task}</strong>
+              <ul>
+                <li>輸入：選一個真實疾病、題幹、圖片、檢查數據或錯題。</li>
+                <li>操作：先用自己的話說明，再對照 ${map.title} 的推理鏈補漏洞。</li>
+                <li>輸出：一張流程圖、一張 Anki、一題測驗、一句臨床解釋。</li>
+                <li>標準：能在 90 秒內講清楚，且能回答「為什麼」與「下一步」。</li>
+              </ul>
+            </article>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderMaxMastery(map) {
+      return `
+        <div class="max-task-grid">
+          ${map.mastery.map((item, index) => `
+            <article class="max-task-card">
+              <strong>驗收 ${index + 1}｜${item}</strong>
+              <ul>
+                <li>最低標準：能正確說出定義、位置、前後因果與一個例子。</li>
+                <li>國考標準：能看懂題幹線索，排除至少兩個錯誤選項。</li>
+                <li>臨床標準：能說出檢查或處置的理由，以及忽略時的風險。</li>
+                <li>錯題標準：能指出自己錯在知識點、節點、模型或決策哪一層。</li>
+              </ul>
+            </article>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    const sideNav = document.querySelector("#sideNav");
+    const mapGrid = document.querySelector("#mapGrid");
+    const detailPanel = document.querySelector("#detailPanel");
+    const aiResult = document.querySelector("#aiResult");
+    const aiPrompt = document.querySelector("#aiPrompt");
+    const toast = document.querySelector("#toast");
+
+    function renderNav() {
+      sideNav.innerHTML = maps.map((map, index) => `
+        <button class="nav-btn ${index === selected ? "active" : ""}" data-index="${index}">
+          <span class="num">${String(index + 1).padStart(2, "0")}</span>
+          <span>${map.title}</span>
+        </button>
+      `).join("");
+    }
+
+    function renderCards() {
+      mapGrid.innerHTML = maps.map((map, index) => `
+        <button class="map-card ${index === selected ? "selected" : ""}" data-index="${index}">
+          <span class="map-top">
+            <span class="badge" style="background:${palettes[index]}">${index + 1}</span>
+            <span class="domain">${map.domain}</span>
+          </span>
+          <h4>${map.title}</h4>
+          <p class="question">${map.question}</p>
+          <span class="mini-flow">${map.nodes.slice(0, 5).map(node => `<span>${node}</span>`).join("")}</span>
+          <span class="output">${map.output}</span>
+        </button>
+      `).join("");
+    }
+
+    function renderDetail() {
+      const map = maps[selected];
+      detailPanel.innerHTML = `
+        <div class="detail-head">
+          <div>
+            <h3>${String(selected + 1).padStart(2, "0")} ${map.title}</h3>
+            <p>${map.question}</p>
+          </div>
+          <span class="badge" style="background:${palettes[selected]}">${map.exam}</span>
+        </div>
+        <div class="deep-grid">
+          <div class="deep-card"><strong>核心地圖</strong><p>${map.coreMap}</p></div>
+          <div class="deep-card"><strong>AI 功能</strong><p>${map.ai}</p></div>
+          <div class="deep-card"><strong>國考對應</strong><p>${map.exam}</p></div>
+          <div class="deep-card"><strong>最終輸出</strong><p>${map.finalPower}</p></div>
+        </div>
+        <div class="node-map">
+          ${map.nodes.map((node, index) => `
+            <div class="node">
+              <span class="dot" style="background:${palettes[selected]}">${index + 1}</span>
+              <span>${node}</span>
+            </div>
+          `).join("")}
+        </div>
+        <div class="output">輸出能力：${map.finalPower}，也就是 ${map.output}</div>
+      `;
+    }
+
+    function renderDeepPanel() {
+      const map = maps[selected];
+      const expanded = map.expanded;
+      document.querySelector("#deepPanel").innerHTML = `
+        <h3>${map.title} 深度熟習任務</h3>
+        <div class="deep-grid">
+          <div class="deep-card">
+            <strong>模型定位</strong>
+            <p>${map.domain} 壓縮成「${map.compressed}」，目標是養成${map.coreAbility}。</p>
+          </div>
+          <div class="deep-card">
+            <strong>能力輸出</strong>
+            <p>${map.finalPower}：能把題幹、圖像、數據或病例放回模型中解釋。</p>
+          </div>
+          <div class="deep-card">
+            <strong>熟習任務</strong>
+            <ul>${map.drills.map(item => `<li>${item}</li>`).join("")}</ul>
+          </div>
+          <div class="deep-card">
+            <strong>驗收標準</strong>
+            <ul>${map.mastery.map(item => `<li>${item}</li>`).join("")}</ul>
+          </div>
+        </div>
+        <div class="expanded-content">
+          <div class="content-section">
+            <h4>核心概念完整展開</h4>
+            <p>${expanded.thesis}</p>
+          </div>
+          <div class="content-section">
+            <h4>核心地圖內容</h4>
+            <ul class="content-list">${expanded.map.map(item => `<li>${item}</li>`).join("")}</ul>
+          </div>
+          <div class="content-section">
+            <h4>核心地圖最大化展開</h4>
+            <ul class="content-list">
+              ${expanded.map.map((item, index) => `
+                <li>${item} 必須再追問：定義是什麼、前一個原因是什麼、下一個結果是什麼、國考如何問、臨床如何用、錯題會錯在哪裡。</li>
+              `).join("")}
+            </ul>
+          </div>
+          <div class="content-section">
+            <h4>每個節點最大化展開</h4>
+            ${renderNodeExpansion(map, selected)}
+          </div>
+          <div class="content-section">
+            <h4>因果鏈 / 推理鏈</h4>
+            <div class="chain">${expanded.chain.map(item => `<span>${item}</span>`).join("")}</div>
+          </div>
+          <div class="content-section">
+            <h4>熟習任務最大化展開</h4>
+            ${renderMaxTasks(map)}
+          </div>
+          <div class="content-section">
+            <h4>驗收內容最大化展開</h4>
+            ${renderMaxMastery(map)}
+          </div>
+          <div class="content-section">
+            <h4>國考與臨床展開</h4>
+            <div class="content-columns">
+              <div>
+                <strong>國考高頻</strong>
+                <ul>${expanded.exam.map(item => `<li>${item}</li>`).join("")}</ul>
+              </div>
+              <div>
+                <strong>臨床能力</strong>
+                <ul>${expanded.clinical.map(item => `<li>${item}</li>`).join("")}</ul>
+              </div>
+            </div>
+          </div>
+          <div class="content-section">
+            <h4>常見混淆與修正</h4>
+            <ul class="content-list">${expanded.pitfalls.map(item => `<li>${item}</li>`).join("")}</ul>
+          </div>
+          <div class="content-section">
+            <h4>AI 深度練習指令</h4>
+            <div class="prompt-card">${expanded.prompt}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderMasteryChecks() {
+      const map = maps[selected];
+      const saved = JSON.parse(localStorage.getItem(`mmm-mastery-${selected}`) || "[]");
+      document.querySelector("#masteryChecks").innerHTML = map.mastery.map((item, index) => `
+        <label>
+          <input type="checkbox" data-check="${index}" ${saved.includes(index) ? "checked" : ""}>
+          <span>${item}</span>
+        </label>
+      `).join("");
+      updateMasteryScore();
+    }
+
+    function updateMasteryScore() {
+      const checks = [...document.querySelectorAll("#masteryChecks input")];
+      const done = checks.filter(check => check.checked).length;
+      const score = checks.length ? Math.round(done / checks.length * 100) : 0;
+      document.querySelector("#masteryScore").textContent = `${score}%`;
+      document.querySelector("#masteryBar").style.width = `${score}%`;
+      const saved = checks
+        .map((check, index) => check.checked ? index : null)
+        .filter(index => index !== null);
+      localStorage.setItem(`mmm-mastery-${selected}`, JSON.stringify(saved));
+    }
+
+    function renderTables() {
+      document.querySelector("#onePageTable tbody").innerHTML = maps.map(map => `
+        <tr>
+          <td><strong>${map.title}</strong></td>
+          <td>${map.question}</td>
+          <td>${map.coreMap}</td>
+          <td>${map.ai}</td>
+          <td>${map.exam}</td>
+          <td>${map.finalPower}</td>
+        </tr>
+      `).join("");
+
+      document.querySelector("#compressionTable tbody").innerHTML = maps.map(map => `
+        <tr>
+          <td>${map.domain}</td>
+          <td>${map.compressed}</td>
+          <td>${map.coreAbility}</td>
+        </tr>
+      `).join("");
+
+      // AI functions shown only in AI center page
+
+      document.querySelector("#learningLoop").innerHTML = learningLoop.map(([name, note]) => `
+        <div class="loop-step">
+          <strong>${name}</strong>
+          <span>${note}</span>
+        </div>
+      `).join("");
+
+      document.querySelector("#loopManual").innerHTML = loopManual.map((item, index) => `
+        <article class="loop-manual-card">
+          <div class="loop-manual-head">
+            <span class="loop-index">${index + 1}</span>
+            <div>
+              <h4>${item.name}</h4>
+              <p>${item.purpose}</p>
+            </div>
+          </div>
+          <div class="loop-detail-grid">
+            <div class="loop-detail"><strong>輸入材料</strong><p>${item.input}</p></div>
+            <div class="loop-detail"><strong>AI 操作</strong><p>${item.aiAction}</p></div>
+            <div class="loop-detail"><strong>使用者動作</strong><p>${item.userAction}</p></div>
+            <div class="loop-detail"><strong>輸出成果</strong><p>${item.output}</p></div>
+            <div class="loop-detail"><strong>驗收標準</strong><p>${item.validation}</p></div>
+            <div class="loop-detail"><strong>回流位置</strong><p>${item.returnsTo}</p></div>
+          </div>
+        </article>
+      `).join("");
+
+      document.querySelector("#aiManualGrid").innerHTML = aiManual.map(item => `
+        <details class="ai-item-details">
+          <summary class="ai-item-sum">
+            <span class="ai-item-icon">${item.icon}</span>
+            <span class="ai-item-name">${item.name}</span>
+            <span class="ai-item-tag">${item.tagline}</span>
+            <span class="ai-sum-arr">&#9658;</span>
+          </summary>
+          <div class="ai-item-body">
+            <div class="ai-row ai-concrete">
+              <span class="ai-row-label">💡 具體例子</span>
+              <span>${item.concrete}</span>
+            </div>
+            <div class="ai-row ai-demo">
+              <span class="ai-row-label">⌨️ 示範指令</span>
+              <span class="ai-demo-text">${item.demo}</span>
+            </div>
+            <div class="ai-row">
+              <span class="ai-row-label">🔧 怎麼用</span>
+              <span>${item.howto}</span>
+            </div>
+            <div class="ai-row ai-unique">
+              <span class="ai-row-label">⚡ 獨特優勢</span>
+              <span>${item.unique}</span>
+            </div>
+          </div>
+        </details>
+      `).join("");
+
+      document.querySelector("#fullAtlas").innerHTML = maps.map((map, index) => {
+        const expanded = map.expanded;
+        return `
+          <article class="os-full-card">
+            <div class="os-full-head">
+              <div>
+                <h4>${String(index + 1).padStart(2, "0")} ${map.title}</h4>
+                <p>${map.question} ${expanded.thesis}</p>
+              </div>
+              <span class="badge" style="background:${palettes[index]}">${map.finalPower}</span>
+            </div>
+            <div class="os-full-grid">
+              <div class="os-stat"><strong>學科壓縮</strong>${map.domain} → ${map.compressed}</div>
+              <div class="os-stat"><strong>核心地圖</strong>${map.coreMap}</div>
+              <div class="os-stat"><strong>AI 功能</strong>${map.ai}</div>
+              <div class="os-stat"><strong>國考對應</strong>${map.exam}</div>
+              <div class="os-stat"><strong>核心能力</strong>${map.coreAbility}</div>
+              <div class="os-stat"><strong>最終輸出</strong>${map.finalPower}</div>
+            </div>
+            <div class="expanded-content">
+              <div class="content-section">
+                <h4>節點完整展開</h4>
+                <ul class="content-list">${map.nodes.map(node => `<li>${node}</li>`).join("")}</ul>
+              </div>
+              <div class="content-section">
+                <h4>每個節點最大化展開</h4>
+                ${renderNodeExpansion(map, index)}
+              </div>
+              <div class="content-section">
+                <h4>核心地圖內容</h4>
+                <ul class="content-list">${expanded.map.map(item => `<li>${item}</li>`).join("")}</ul>
+              </div>
+              <div class="content-section">
+                <h4>核心地圖最大化展開</h4>
+                <ul class="content-list">
+                  ${expanded.map.map(item => `<li>${item} 進一步熟悉時，要補上定義、因果、檢查、治療或處置、國考問法、臨床應用與錯題陷阱。</li>`).join("")}
+                </ul>
+              </div>
+              <div class="content-section">
+                <h4>推理鏈</h4>
+                <div class="chain">${expanded.chain.map(item => `<span>${item}</span>`).join("")}</div>
+              </div>
+              <div class="content-section">
+                <h4>熟習任務與驗收</h4>
+                <div class="content-columns">
+                  <div>
+                    <strong>熟習任務</strong>
+                    <ul>${map.drills.map(item => `<li>${item}</li>`).join("")}</ul>
+                  </div>
+                  <div>
+                    <strong>能力驗收</strong>
+                    <ul>${map.mastery.map(item => `<li>${item}</li>`).join("")}</ul>
+                  </div>
+                </div>
+              </div>
+              <div class="content-section">
+                <h4>熟習任務最大化展開</h4>
+                ${renderMaxTasks(map)}
+              </div>
+              <div class="content-section">
+                <h4>驗收內容最大化展開</h4>
+                ${renderMaxMastery(map)}
+              </div>
+              <div class="content-section">
+                <h4>國考與臨床最大展開</h4>
+                <div class="content-columns">
+                  <div>
+                    <strong>國考高頻</strong>
+                    <ul>${expanded.exam.map(item => `<li>${item}</li>`).join("")}</ul>
+                  </div>
+                  <div>
+                    <strong>臨床能力</strong>
+                    <ul>${expanded.clinical.map(item => `<li>${item}</li>`).join("")}</ul>
+                  </div>
+                </div>
+              </div>
+              <div class="content-section">
+                <h4>常見混淆與錯題修正</h4>
+                <ul class="content-list">${expanded.pitfalls.map(item => `<li>${item}</li>`).join("")}</ul>
+              </div>
+              <div class="content-section">
+                <h4>AI 深度練習指令</h4>
+                <div class="prompt-card">${expanded.prompt}</div>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function selectMap(index) {
+      selected = Number(index);
+      renderNav();
+      renderCards();
+      renderDetail();
+      renderDeepPanel();
+      renderMasteryChecks();
+      makeAIResult();
+      document.querySelector(".workspace").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function getModeLabel() {
+      return {
+        disease: "AI 疾病地圖生成",
+        anki: "AI-Anki 出卡",
+        case: "AI 病例推理",
+        mistake: "AI 錯題分析"
+      }[aiMode];
+    }
+
+    function makeAIResult() {
+      const map = maps[selected];
+      const expanded = map.expanded;
+      const topic = aiPrompt.value.trim() || `${map.domain} 高頻考點`;
+      const topNodes = map.nodes.slice(0, 5).join(" → ");
+      const templates = {
+        disease: `${getModeLabel()}\n主題：${topic}\n\n模型定位：${expanded.thesis}\n\n生成鏈：${expanded.chain.join(" → ")}\n\n掛載地圖：${map.title}\n核心地圖：${map.coreMap}\n核心節點：${topNodes}\n能力目標：${map.finalPower}\n\n國考高頻：\n- ${expanded.exam.join("\n- ")}\n\n臨床連結：\n- ${expanded.clinical.join("\n- ")}\n\n下一步：把主題放進上述推理鏈，補上機制、檢查、治療、陷阱與一題國考題。`,
+        anki: `${getModeLabel()}\n主題：${topic}\n\n卡片 1｜Q：${map.question}\nA：${map.finalPower}，能做到 ${map.output}\n\n卡片 2｜Q：${map.title} 的推理鏈是什麼？\nA：${expanded.chain.join(" → ")}\n\n卡片 3｜Q：本模型最常考什麼？\nA：${expanded.exam.slice(0, 2).join("；")}\n\n卡片 4｜Q：常見錯誤是什麼？\nA：${expanded.pitfalls.join("；")}\n\n卡片 5｜Q：如何驗收自己真的熟悉？\nA：${map.mastery[0]}；${map.mastery[1]}。`,
+        case: `${getModeLabel()}\n病例輸入：${topic}\n\n推理順序：\n1. 先定位系統：${map.domain}\n2. 找主軸問題：${map.question}\n3. 對照節點：${topNodes}\n4. 跑完整推理鏈：${expanded.chain.join(" → ")}\n5. 產出 ${map.finalPower}\n6. 輸出鑑別診斷、必要檢查、立即處置\n\n臨床提醒：\n- ${expanded.clinical.join("\n- ")}\n\nPBL 任務：用一句話說明「為什麼是這個診斷」，再列出下一步最安全處置。`,
+        mistake: `${getModeLabel()}\n錯題：${topic}\n\n回收流程：\n錯因分類 → 對應地圖 → 補節點 → 生成 Anki → 48 小時後重測\n\n本題建議掛載：${map.title}\n弱點節點：${map.nodes.slice(-4).join("、")}\n修正能力：${map.finalPower}\n\n常見混淆：\n- ${expanded.pitfalls.join("\n- ")}\n\n修正目標：下次看到相同題幹，先啟動「${expanded.chain.join(" → ")}」而不是硬背答案。`
+      };
+      aiResult.textContent = templates[aiMode];
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 1800);
+    }
+
+    sideNav.addEventListener("click", event => {
+      const button = event.target.closest("button[data-index]");
+      if (button) selectMap(button.dataset.index);
+    });
+
+    mapGrid.addEventListener("click", event => {
+      const button = event.target.closest("button[data-index]");
+      if (button) selectMap(button.dataset.index);
+    });
+
+    document.querySelector("#aiTabs").addEventListener("click", event => {
+      const button = event.target.closest(".tab");
+      if (!button) return;
+      aiMode = button.dataset.mode;
+      document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+      button.classList.add("active");
+      makeAIResult();
+    });
+
+    document.querySelector("#generateBtn").addEventListener("click", () => {
+      makeAIResult();
+      showToast("已生成學習鏈，並掛載到目前地圖。");
+    });
+
+    document.querySelector("#copyBtn").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(aiResult.textContent);
+      showToast("已複製 AI 學習鏈。");
+    });
+
+    document.querySelector("#masteryChecks").addEventListener("change", event => {
+      if (event.target.matches("input[type='checkbox']")) {
+        updateMasteryScore();
+        showToast("熟習度已更新，這個核心模型更穩了。");
+      }
+    });
+
+    aiPrompt.addEventListener("input", () => {
+      clearTimeout(window.promptTimer);
+      window.promptTimer = setTimeout(makeAIResult, 250);
+    });
+
+    renderNav();
+    renderCards();
+    renderDetail();
+    renderDeepPanel();
+    renderMasteryChecks();
+    renderTables();
+    makeAIResult();
+  
+
+    // ══════════════════════════════════════════════════════
+    // 國考模式資料庫
+    // ══════════════════════════════════════════════════════
+    const EXAM_DB = {
+      // 每個考點：{rank, os, osIdx, topic, freq, opts, ans, exp, mnem}
+      top100: [
+        // OS0 人體地圖
+        {rank:1,os:"人體地圖",osIdx:0,topic:"腦神經 CN III 損傷的眼球表現",freq:94,
+         opts:["眼球內上偏、瞳孔縮小","眼球外下偏（down and out）、瞳孔散大","眼球不能外展、瞳孔正常","眼球震顫、複視"],
+         ans:1,exp:"CN III（動眼神經）支配：內直肌、上直肌、下直肌、下斜肌＋提上瞼肌＋瞳孔括約肌。損傷→對抗肌（外直肌CN VI＋上斜肌CN IV）勝出→眼球外下偏。副交感纖維（走在神經外層）被壓迫→瞳孔散大。後交通動脈瘤最常見原因，需緊急排除SAH。",
+         mnem:"CN III=三條肌肉+提眼瞼+縮瞳；壓迫→眼外下偏+瞳孔大"},
+        {rank:2,os:"人體地圖",osIdx:0,topic:"Bell palsy vs 中樞性顏面神經麻痹",freq:91,
+         opts:["兩者都是對側下臉癱瘓","Bell palsy：同側全臉（含額頭）；中樞：對側下臉（額頭保留）","Bell palsy：對側；中樞：同側","兩者都造成同側全臉癱瘓"],
+         ans:1,exp:"額頭肌肉（額肌）受雙側皮質支配→中樞病灶（腦中風）時，對側額頭保留。Bell palsy（核下病灶）→同側全顏面神經受損→同側整臉包含額頭。鑑別關鍵：額頭能不能皺眉。",
+         mnem:"核上（中樞）額頭保留；核下（Bell）整臉全癱"},
+        {rank:3,os:"人體地圖",osIdx:0,topic:"McBurney點的臨床意義",freq:88,
+         opts:["膽囊炎的壓痛點","急性闌尾炎的壓痛點","腎結石的放射痛點","脾臟腫大的叩診點"],
+         ans:1,exp:"McBurney點=臍與右前上髂棘連線的外1/3處，對應盲腸/闌尾位置。急性闌尾炎時此點壓痛（直接壓痛）且Rovsing sign陽性（按左下腹→右下腹痛）。Psoas sign（右腿被動伸展痛）、Obturator sign（右腿內旋痛）也支持診斷。",
+         mnem:"McBurney=臍到右ASIS外1/3；Rovsing=按左痛右"},
+        // OS1 穩態流程圖
+        {rank:4,os:"穩態流程圖",osIdx:1,topic:"RAAS系統各節點藥物阻斷",freq:95,
+         opts:["Losartan阻斷ACE；Captopril阻斷AT1受體","Captopril阻斷ACE；Losartan阻斷AT1受體","Aliskiren阻斷AT1；Spironolactone阻斷ACE","Spironolactone阻斷Renin；Captopril阻斷Aldosterone"],
+         ans:1,exp:"RAAS鏈：Renin（Aliskiren阻斷）→Ang I→ACE（ACEI如Captopril阻斷）→Ang II→AT1受體（ARB如Losartan阻斷）→Aldosterone（Spironolactone阻斷受體）。記住每個節點對應的藥物類別是國考最高頻考點之一。",
+         mnem:"Renin→ACE→AT1→Aldo；藥：Aliskiren/ACEI/ARB/Spirono"},
+        {rank:5,os:"穩態流程圖",osIdx:1,topic:"DKA補鉀的正確時機",freq:93,
+         opts:["先給胰島素，再根據血鉀補充","血鉀<3.5才補K+，K+>3.5先給胰島素；K+<3.5不給胰島素先補K+","不管血鉀多少都先給NaHCO3","先給高張鹽水再給胰島素"],
+         ans:1,exp:"胰島素使K+移入細胞→血鉀快速下降→可能致命性低血鉀。原則：K+<3.5 mEq/L→先補K+（至少達3.5）才給胰島素；K+3.5-5.5→胰島素同時補K+；K+>5.5→先不補K+。補液用NS（生理食鹽水），血糖降至250 mg/dL改D5W+胰島素。",
+         mnem:"DKA補K規則：<3.5先補K再給胰島素；>5.5不補K"},
+        {rank:6,os:"穩態流程圖",osIdx:1,topic:"高血壓急症vs緊急的處置差異",freq:90,
+         opts:["兩者都需靜脈降壓，目標相同","急症：靜脈降壓1小時降20-25%；緊急：口服藥24-48小時緩慢降","急症：立即降到正常；緊急：不需降壓","兩者都口服Captopril處理"],
+         ans:1,exp:"高血壓急症（Emergency）=BP↑+靶器官損傷（腦病/心衰/主動脈剝離）→靜脈Labetalol或Nicardipine，1小時內降低20-25%，不可過快（自動調控上移）。高血壓緊急（Urgency）=BP↑但無靶器官損傷→口服藥24-48小時緩慢降壓。",
+         mnem:"急症有靶器官損傷→靜脈；緊急無損傷→口服"},
+        // OS2 代謝地圖
+        {rank:7,os:"代謝地圖",osIdx:2,topic:"PFK-1的活化與抑制因子",freq:92,
+         opts:["ATP活化PFK-1；AMP抑制PFK-1","AMP/ADP活化PFK-1；ATP/Citrate抑制PFK-1","Citrate活化PFK-1；AMP抑制PFK-1","胰島素抑制PFK-1；Glucagon活化PFK-1"],
+         ans:1,exp:"PFK-1（磷酸果糖激酶-1）=糖解限速酶。能量不足（AMP/ADP↑）→活化PFK-1→糖解加速補充ATP。能量充足（ATP↑）或TCA滿載（Citrate↑）→抑制PFK-1→停止糖解。胰島素促進Fructose-2,6-BP合成→間接活化PFK-1。",
+         mnem:"AMP活化（沒電了）；ATP/Citrate抑制（夠了）"},
+        {rank:8,os:"代謝地圖",osIdx:2,topic:"TCA循環的限速酶及調控",freq:89,
+         opts:["丙酮酸去氫酶（PDH）；受AMP活化","異檸檬酸去氫酶；受NADH/ATP抑制、Ca2+活化","蘋果酸去氫酶；受Citrate抑制","檸檬酸合成酶；受ADP抑制"],
+         ans:1,exp:"TCA限速酶=異檸檬酸去氫酶（Isocitrate dehydrogenase）。能量充足（NADH↑、ATP↑）→抑制（負回饋）。能量需求↑（ADP↑、Ca2+↑於肌肉運動時）→活化。其他調控點：α-KG去氫酶（也受NADH抑制）、檸檬酸合成酶。",
+         mnem:"異檸檬酸DH=TCA限速；NADH/ATP抑制，Ca2+/ADP活化"},
+        {rank:9,os:"代謝地圖",osIdx:2,topic:"G6PD缺乏症的誘發藥物",freq:87,
+         opts:["Metformin、Statin","Primaquine、Dapsone、磺胺類","Aspirin、Ibuprofen","β-blocker、CCB"],
+         ans:1,exp:"G6PD缺乏→HMP shunt受損→NADPH↓→谷胱甘肽無法還原→RBC氧化損傷→溶血。誘發藥物：Primaquine（抗瘧）、Dapsone（麻瘋/PCP）、磺胺類（Sulfamethoxazole）、Nitrofurantoin。誘發食物：蠶豆（Favism）。",
+         mnem:"G6PD誘發：Primaquine/Dapsone/磺胺/蠶豆→溶血"},
+        // OS3 損傷地圖
+        {rank:10,os:"損傷地圖",osIdx:3,topic:"心肌梗塞後3-7天最危險的併發症",freq:91,
+         opts:["心室顫動（VF）","心臟游離壁破裂/乳頭肌破裂","完全性AV block","心包填塞"],
+         ans:1,exp:"MI後時序：當場→VF（最常見猝死）；1-3天→嗜中性球浸潤；3-7天→巨噬細胞清除壞死組織→心室壁最薄→游離壁破裂（→心包填塞）/乳頭肌破裂（→急性MR）/VSD（→左右心短路）。這是MI後住院期間最高危時期。",
+         mnem:"MI後3-7天=清除期=最軟=最易破裂"},
+        {rank:11,os:"損傷地圖",osIdx:3,topic:"壞死類型與對應疾病",freq:88,
+         opts:["腦梗塞=凝固性壞死；心肌梗塞=液化性壞死","心肌梗塞=凝固性壞死；腦梗塞=液化性壞死（唯一例外）","結核病=脂肪性壞死；胰臟炎=乾酪性壞死","所有梗塞都是液化性壞死"],
+         ans:1,exp:"壞死5型：①凝固性（心/腎/脾/肝梗塞，架構保留）②液化性（腦梗塞唯一例外＋化膿性感染）③乾酪性（結核病/深部黴菌，起司外觀）④脂肪性（急性胰臟炎/乳房外傷）⑤纖維素性（惡性高血壓/血管炎）。腦梗塞=液化性因腦組織脂質豐富、水解酶多。",
+         mnem:"凝固=梗塞主流；腦=液化（唯一例外）；結核=乾酪"},
+        {rank:12,os:"損傷地圖",osIdx:3,topic:"Bcl-2與凋亡的關係",freq:82,
+         opts:["Bcl-2促進凋亡；Bax抑制凋亡","Bcl-2抑制凋亡；Bax促進凋亡；Bcl-2過表達→濾泡性淋巴瘤","p53過表達→抑制凋亡","Caspase-3啟動凋亡，Bcl-2是執行者"],
+         ans:1,exp:"凋亡內源性途徑：DNA損傷→Bax↑→粒線體通透性→Cytochrome c釋出→Caspase-9→Caspase-3（執行者）。Bcl-2=抗凋亡蛋白（守住粒線體膜）。t(14;18)→BCL2基因移位至IgH啟動子→Bcl-2過表達→B細胞無法凋亡→濾泡性淋巴瘤。",
+         mnem:"Bcl-2=Block cell death（抗凋亡）；Bax=Break（促凋亡）"},
+        // OS4 受體地圖
+        {rank:13,os:"受體地圖",osIdx:4,topic:"α1受體的信號傳導路徑",freq:93,
+         opts:["Gs→cAMP→PKA","Gq→PLC→IP3+DAG→Ca2+","Gi→cAMP↓","Gq→AC→cAMP↑"],
+         ans:1,exp:"α1受體→Gq蛋白→磷脂酶C（PLC）→IP3（內質網Ca2+釋放）+ DAG（PKC活化）→血管平滑肌收縮→BP↑。對比：β受體→Gs→AC→cAMP↑→PKA。α2→Gi→AC↓→cAMP↓→NE釋放↓（負回饋）。",
+         mnem:"α1=Gq→IP3→Ca2+→收縮；β=Gs→cAMP→PKA→舒張/加速"},
+        {rank:14,os:"受體地圖",osIdx:4,topic:"β-blocker在哮喘患者的禁忌",freq:91,
+         opts:["所有β-blocker都絕對禁忌","非選擇性β-blocker禁忌；選擇性β1（Metoprolol）低劑量相對安全","只有Carvedilol禁忌","β-blocker在哮喘是首選治療"],
+         ans:1,exp:"β2受體在支氣管→拮抗→支氣管收縮→哮喘惡化甚至死亡。非選擇性（Propranolol）同時拮抗β1＋β2→絕對禁忌。選擇性β1（Metoprolol、Atenolol、Bisoprolol）低劑量時對β2影響較小→相對安全（高劑量仍需謹慎）。Carvedilol（α＋非選擇β）→哮喘禁忌。",
+         mnem:"非選擇β-blocker=哮喘禁忌；選擇性β1=相對安全"},
+        {rank:15,os:"受體地圖",osIdx:4,topic:"嗜鉻細胞瘤術前藥物準備順序",freq:85,
+         opts:["先β-blocker再α-blocker","先α-blocker（Phenoxybenzamine）再β-blocker","直接手術不需術前用藥","先Spironolactone再ACEi"],
+         ans:1,exp:"嗜鉻細胞瘤分泌大量Epinephrine/NE→α＋β效應→高血壓危象。術前準備：先給α-blocker（Phenoxybenzamine，非選擇性，10-14天）→讓血管擴張、補充血容量→再加β-blocker。若先給β-blocker→β效應阻斷但α效應暴露→血壓反而更高！",
+         mnem:"Pheo術前：α先→β後；順序不能反（先β→反彈高血壓）"},
+        // OS5 免疫軍隊
+        {rank:16,os:"免疫軍隊",osIdx:5,topic:"MHC I vs MHC II的分布與識別細胞",freq:94,
+         opts:["MHC I：APC→CD4+T識別；MHC II：所有有核細胞→CD8+T識別","MHC I：所有有核細胞→CD8+T識別；MHC II：APC→CD4+T識別","兩者都在所有細胞表面；都由CD4+識別","MHC I=B細胞；MHC II=T細胞"],
+         ans:1,exp:"MHC I（HLA-A/B/C）：所有有核細胞表面，呈現細胞內抗原（病毒/腫瘤）→CD8+細胞毒T細胞識別→殺死感染細胞。MHC II（HLA-DR/DP/DQ）：只在APC（樹突細胞、巨噬細胞、B細胞）→CD4+輔助T細胞識別→啟動免疫反應。記憶：1×8=8（MHCI×CD8）；2×4=8（MHCII×CD4）。",
+         mnem:"MHC I×8=8；MHC II×4=8（兩組都等於8）"},
+        {rank:17,os:"免疫軍隊",osIdx:5,topic:"IgE介導的Type I過敏機制",freq:90,
+         opts:["IgG+補體→細胞溶解","IgE→肥大細胞脫顆粒→Histamine→立即型過敏","T細胞→IFN-γ→遲發型","IC沉積→補體→血管炎"],
+         ans:1,exp:"Type I過敏：初次暴露→IgE生成→結合肥大細胞FcεRI。再次暴露→抗原交聯IgE→脫顆粒→Histamine（立即，分鐘）+ LTC4/LTD4（遲發，小時）+ PGD2→血管擴張/支氣管收縮/分泌增加。過敏性休克→Epinephrine（首選）。",
+         mnem:"IgE+肥大細胞→脫顆粒→Histamine→立即型（分鐘）"},
+        {rank:18,os:"免疫軍隊",osIdx:5,topic:"過敏反應四型鑑別",freq:88,
+         opts:["I型=IgG；II型=IgE；III型=T細胞；IV型=IC","I型=IgE（立即）；II型=IgG細胞毒；III型=IC；IV型=T細胞（遲發48-72h）","四型都由T細胞介導","四型都由補體介導"],
+         ans:1,exp:"I型（IgE＋肥大細胞→Histamine）：過敏性休克、哮喘、蕁麻疹。II型（IgG/M→補體→細胞溶解）：ABO輸血反應、重症肌無力（抗AChR）。III型（IC沉積→補體）：SLE、血清病、Arthus反應。IV型（T細胞介導→遲發48-72h）：接觸性皮炎、PPD試驗、移植排斥。",
+         mnem:"ACID：I=Anaphylaxis；II=Cytotoxic；III=IC；IV=Delayed"},
+        // OS6 疾病生命史
+        {rank:19,os:"疾病生命史",osIdx:6,topic:"糖尿病三大微血管病變",freq:95,
+         opts:["高血壓、冠心病、周邊動脈疾病","視網膜病變（失明首因）、腎病變（ESRD首因）、神經病變（截肢首因）","視網膜病變、腦中風、心肌梗塞","腎病變、骨質疏鬆、白內障"],
+         ans:1,exp:"DM微血管病變3R：Retinopathy（視網膜）=台灣成年人失明主因；Renal（腎病）=台灣ESRD（洗腎）主因；neuropathy（神經病變）=非外傷截肢主因。大血管病變（macrovascular）：MI/中風/PAD，死亡主因。篩查：診斷起每年眼底＋尿蛋白＋神經感覺測試。",
+         mnem:"DM 3R：Retina失明/Renal洗腎/neuropathy截肢"},
+        {rank:20,os:"疾病生命史",osIdx:6,topic:"SGLT2抑制劑的心腎保護機制",freq:91,
+         opts:["促進胰島素分泌→降血糖保腎","抑制腎近端小管葡萄糖重吸收→降腎小球高過濾→腎保護；也降體重/BP/尿酸","阻斷AT1受體→RAAS抑制","活化AMPK→糖質新生↓"],
+         ans:1,exp:"SGLT2i（Empagliflozin、Dapagliflozin）：阻斷近端小管SGLT2→葡萄糖尿排出↑→血糖↓（不依賴胰島素）。腎保護機制：降低腎小球高過濾（Glomerular hyperfiltration）→減少腎小球壓力。額外益處：降體重/BP/尿酸。副作用：泌尿道感染、Euglycemic DKA（正常血糖酮酸中毒）。",
+         mnem:"SGLT2i：尿糖排出+降腎高過濾+降體重BP尿酸"},
+        // OS7 外科決策樹
+        {rank:21,os:"外科決策樹",osIdx:7,topic:"急性闌尾炎Alvarado評分",freq:89,
+         opts:["評分≥7分=需立即化療","評分≥7分=高度懷疑急性闌尾炎→手術；≤3分=低機率","評分只用於評估膽囊炎","評分≥5分=強制手術"],
+         ans:1,exp:"Alvarado score（MANTRELS）：轉移性RLQ痛(1)+厭食(1)+噁心(1)+RLQ壓痛(2)+反彈痛(1)+體溫>37.3(1)+WBC>10000(2)+核左移(1)=滿分10分。≥7：高度懷疑→手術；5-6：不確定→CT確認；≤4：低機率→觀察。",
+         mnem:"Alvarado≥7=手術；記MANTRELS共10分"},
+        {rank:22,os:"外科決策樹",osIdx:7,topic:"主動脈剝離A型vs B型處置",freq:87,
+         opts:["A型：藥物控制；B型：手術","A型（升主動脈）：緊急手術；B型（降主動脈）：藥物（β-blocker+Nitroprusside）","兩型都先溶栓再手術","兩型都只用藥物"],
+         ans:1,exp:"主動脈剝離（Aortic dissection）按Stanford分類：A型（累及升主動脈）→急性心包填塞/AI風險→緊急手術（死亡率每小時增加1-2%）。B型（只在降主動脈）→藥物治療目標：HR<60、SBP<120 mmHg，靜脈β-blocker（Labetalol）+Nitroprusside。",
+         mnem:"剝離A型=刀（手術急症）；B型=藥（β-blocker）"},
+        // OS8 妊娠時間軸
+        {rank:23,os:"妊娠時間軸",osIdx:8,topic:"子癇前症的診斷標準與處置",freq:90,
+         opts:["孕前高血壓即診斷","妊娠20週後：BP≥140/90+蛋白尿（≥300mg/24h）；重度：BP≥160/110或靶器官損傷","孕早期發燒即診斷","任何水腫即診斷"],
+         ans:1,exp:"子癇前症（Preeclampsia）：妊娠≥20週後，BP≥140/90 mmHg（兩次間隔4小時）＋蛋白尿≥300mg/24h或尿蛋白/肌酐≥0.3。重度特徵：BP≥160/110、血小板<100k、腎功能異常、肺水腫、新發頭痛/視覺改變。唯一根治=分娩。MgSO4預防抽搐；Labetalol/Hydralazine降壓。",
+         mnem:"子癇前症=20週後BP↑+蛋白尿；MgSO4防抽搐"},
+        {rank:24,os:"妊娠時間軸",osIdx:8,topic:"致畸物最危險的胚胎發育時期",freq:86,
+         opts:["第1-2週（受精/植入）=器官形成最敏感","第3-8週（胚胎期）=器官形成最敏感（最危險窗口）","第9週以後=最敏感期","出生後第1週=最危險"],
+         ans:1,exp:"胚胎發育：1-2週=All or nothing（致畸物→流產或正常）。3-8週=胚胎期（Embryonic period）=器官形成（Organogenesis）=致畸物最敏感期。心臟3-6週、神經管4週、四肢5-8週。9週以後=胎兒期=生長為主，致畸效果主要是生長遲緩/功能缺損。",
+         mnem:"週3-8=器官形成=最危險；TORCH+酒精+Isotretinoin"},
+        // OS9 發展時間軸
+        {rank:25,os:"發展時間軸",osIdx:9,topic:"兒童發展里程碑：12個月",freq:88,
+         opts:["能說50個字；三輪車；雙腳跳","獨立行走；說1個有意義詞；揮手再見","能背數字1-10；畫圓形","能跑步；問問題（為什麼？）"],
+         ans:1,exp:"12個月（1歲）里程碑：粗動作=獨立站立/步行開始；細動作=拇指對指（Pincer grasp）；語言=說1個有意義詞（mama/dada）；社交=揮手再見/分離焦慮高峰。里程碑延遲：12個月未說任何詞→聽力檢查；未站立→神經學評估。",
+         mnem:"12個月：走路/說1詞/揮手再見/分離焦慮"},
+        {rank:26,os:"發展時間軸",osIdx:9,topic:"Apgar評分的評估時間和項目",freq:84,
+         opts:["出生後1小時和6小時；評估5項","出生後1分鐘和5分鐘；評估：心跳/呼吸/肌張力/反射/膚色","出生後24小時；評估體重/頭圍","出生後即刻評估，只評估哭聲"],
+         ans:1,exp:"Apgar score：出生後1分鐘（急性適應）和5分鐘（持續窒息指標）評估。5項各0-2分共10分：Appearance（膚色）/Pulse（心跳，<100=1，>100=2）/Grimace（反射刺激）/Activity（肌張力）/Respiration（呼吸）。≥7=正常；4-6=需刺激；<4=需積極復甦。",
+         mnem:"Apgar=APGAR；1分鐘和5分鐘；≥7正常"},
+        // OS10 神經網路
+        {rank:27,os:"神經網路",osIdx:10,topic:"多巴胺路徑與精神疾病",freq:92,
+         opts:["黑質紋狀體↑=帕金森；中腦邊緣↓=精神分裂","黑質紋狀體↓=帕金森；中腦邊緣↑=精神分裂（陽性症狀）","多巴胺↓在所有路徑=精神分裂","血清素↑=帕金森；多巴胺↓=憂鬱症"],
+         ans:1,exp:"多巴胺四條路徑：①黑質紋狀體：DA↓=帕金森（動作障礙）；典型抗精神病藥拮抗→EPS副作用。②中腦邊緣：DA↑=精神分裂陽性症狀（幻覺/妄想）。③中腦皮質：DA↓=精神分裂陰性症狀（情感平板）。④結節漏斗：DA↓=高泌乳素血症（抗精神藥副作用）。",
+         mnem:"帕金森=黑質紋狀體DA↓；精神分裂=中腦邊緣DA↑"},
+        {rank:28,os:"神經網路",osIdx:10,topic:"Wernicke腦病的治療順序",freq:89,
+         opts:["先給葡萄糖再補Thiamine（B1）","先給Thiamine（B1）再給葡萄糖（順序絕對不能顛倒）","直接給B12","先給Glucagon再給葡萄糖"],
+         ans:1,exp:"Wernicke腦病=Thiamine（B1）缺乏（慢性酒精中毒/長期TPN）→PDH和α-KG去氫酶失活→神經損傷。三聯症：眼肌麻痹＋共濟失調＋意識混亂。給葡萄糖前先給Thiamine！（否則葡萄糖代謝消耗殘餘B1→Wernicke惡化為Korsakoff失憶症，不可逆）。",
+         mnem:"B1先給再給糖！B1→Glucose（順序不能反）"},
+        // OS11 風險矩陣
+        {rank:29,os:"風險矩陣",osIdx:11,topic:"Wells score用於DVT/PE風險評估",freq:87,
+         opts:["Wells≥3分=低風險；<3分=高風險","DVT Wells≥3分=高風險→超音波；PE Wells>4分=高風險→CTPA","Wells score只用於心肌梗塞","Wells≥1分=立即抗凝血治療"],
+         ans:1,exp:"DVT Wells score：臨床DVT症狀/癱瘓/3天臥床/沿靜脈壓痛/整腿水腫/患側脛腓圍差>3cm/凹陷性水腫/靜脈側枝/其他診斷可能性（-2）→≥3=高風險→超音波；1-2=中風險→超音波或D-dimer；≤0=低風險→D-dimer。D-dimer陰性可排除低中風險PE。CTPA=PE診斷金標準。",
+         mnem:"DVT Wells≥3=高風險超音波；D-dimer陰性排除低風險"},
+        {rank:30,os:"風險矩陣",osIdx:11,topic:"Framingham心臟病風險評估因子",freq:83,
+         opts:["只看血壓和血糖","年齡/性別/總膽固醇/HDL/收縮壓/吸菸/糖尿病","只看BMI和腰圍","只看LDL一項"],
+         ans:1,exp:"Framingham Risk Score計算10年心血管事件風險。因子：年齡＋性別＋總膽固醇＋HDL-C（高保護）＋收縮壓（是否治療中）＋吸菸（是否目前吸）＋糖尿病。風險>10%=中高風險→積極降脂（LDL目標<100 mg/dL）。≥20%=高風險→LDL<70 mg/dL。",
+         mnem:"Framingham=AGe/Sex/TC/HDL/SBP/Smoke/DM→10年風險"}
+      ]
+    };
+
+    // 補充 top300 和 top1000 精選（簡版）
+    EXAM_DB.top300 = [
+      {rank:31,os:"人體地圖",osIdx:0,topic:"Horner症候群三聯症",freq:79,opts:["散瞳+眼瞼上提+多汗","縮瞳+上瞼下垂+無汗（Ptosis/Miosis/Anhidrosis）","散瞳+複視+面癱","縮瞳+眼球突出+流淚"],ans:1,exp:"Horner症候群=交感神經鏈受損（頸部/胸尖）。三聯症：Ptosis（上瞼下垂）+ Miosis（縮瞳）+ Anhidrosis（同側無汗）。常見原因：Pancoast瘤（肺尖）、頸動脈夾層、頸椎手術。",mnem:"Horner=PAM：Ptosis/Anhidrosis/Miosis"},
+      {rank:32,os:"穩態流程圖",osIdx:1,topic:"腎小管各節段功能與對應利尿劑",freq:77,opts:["近端小管=Thiazide；TAL=Furosemide","近端小管=SGLT2i；TAL（亨利升支）=Furosemide（NKCC2）；遠端=Thiazide；集尿管=Spironolactone","所有利尿劑都作用於集尿管","Furosemide=遠端小管；Thiazide=TAL"],ans:1,exp:"腎小管藥物定位：近端=SGLT2i（NaGlucose共輸）、碳酸酐酶抑制劑（Acetazolamide）；TAL=Furosemide（NKCC2）；遠端曲管=Thiazide（NaCl共輸）；集尿管=Spironolactone（Aldosterone受體）、ADH拮抗劑（Tolvaptan）。",mnem:"SGLT2近端/Furo在TAL/Thiazide遠端/Spiro集尿管"},
+      {rank:33,os:"代謝地圖",osIdx:2,topic:"Thiamine（B1）依賴的三個酵素",freq:78,opts:["HMG-CoA還原酶、PDH、異檸檬酸DH","丙酮酸去氫酶（PDH）、α-KG去氫酶、轉酮醇酶（HMP shunt）","乙醯CoA羧化酶、ACC、FAS","ATP合成酶、Complex I、Complex III"],ans:1,exp:"B1（Thiamine）=TPP（焦磷酸硫胺素）輔因子，依賴的三個酵素：①PDH（丙酮酸→乙醯CoA）②α-KG去氫酶（TCA第5步）③轉酮醇酶（HMP shunt）。B1缺乏→這三個酵素失活→乳酸↑/TCA停擺/NADPH↓。臨床：Wernicke（腦）、Beriberi（心/周邊）。",mnem:"B1三酵素：PDH/α-KG DH/轉酮醇酶；記：PAT"},
+      {rank:34,os:"損傷地圖",osIdx:3,topic:"p53腫瘤抑制基因的功能",freq:80,opts:["促進細胞增殖","DNA損傷→p53↑→G1/S停滯→修復或凋亡；>50%癌症有p53突變","p53=致癌基因（Oncogene）","p53只在肝臟表達"],ans:1,exp:"p53（TP53）=腫瘤抑制基因「基因組守護者」。正常：MDM2→p53降解（低量）。DNA損傷→ATM磷酸化→p53穩定↑→p21（CDK抑制）→G1/S停滯→DNA修復。修復失敗→Bax↑→粒線體→Caspase→凋亡。Li-Fraumeni症候群=遺傳性p53突變。",mnem:"p53=守護基因組；DNA損傷→p53↑→停止或凋亡"},
+      {rank:35,os:"受體地圖",osIdx:4,topic:"Dobutamine vs Dopamine的受體作用",freq:76,opts:["兩者都只作用α1","Dobutamine=純β1（心輸出↑不升壓）；Dopamine依劑量：低DA受體/中β1/高α1","Dopamine=選擇性β2；Dobutamine=α1","兩者作用相同可互換"],ans:1,exp:"Dobutamine=選擇性β1激動劑→心肌收縮力↑（正性肌力）不顯著升高HR或BP；用於急性心衰竭/心源性休克。Dopamine依劑量：低（<5）DA受體→腎血流↑；中（5-10）β1→心輸出↑；高（>10）α1→血管收縮升壓。",mnem:"Dobu=純β1心輸出↑；Dopa低DA/中β1/高α1"},
+      {rank:36,os:"免疫軍隊",osIdx:5,topic:"T細胞的兩個活化信號",freq:82,opts:["信號1：TCR+自身抗原；信號2：IL-4","信號1：TCR識別MHC-peptide；信號2：CD28（T）-B7（APC）共刺激；只有信號1→Anergy","只需信號1即可完全活化","信號1：IL-2；信號2：TCR"],ans:1,exp:"T細胞活化需要兩個信號：①TCR識別MHC+peptide（信號1，抗原特異性）②CD28（T細胞）與B7/CD80/86（APC）結合（共刺激）。只有信號1而無共刺激→Anergy（無反應狀態/耐受）。CTLA-4競爭CD28位點→免疫檢查點；anti-CTLA-4（Ipilimumab）解除抑制→抗腫瘤。",mnem:"T細胞活化=TCR+CD28；缺信號2→Anergy（無反應）"},
+      {rank:37,os:"疾病生命史",osIdx:6,topic:"心衰竭四大降死亡率藥物（HFrEF）",freq:84,opts:["只需利尿劑","ACEI/ARB/ARNI＋β-blocker＋MRA（Spironolactone）＋SGLT2i","只需β-blocker","Digoxin＋利尿劑＋Amiodarone"],ans:1,exp:"HFrEF（EF<40%）四大有死亡率效益的治療（ABMS）：A=ACEI/ARB或ARNI（Sacubitril/Valsartan）、B=β-blocker（Carvedilol/Metoprolol/Bisoprolol）、M=MRA（Spironolactone/Eplerenone）、S=SGLT2i（Empagliflozin/Dapagliflozin）。利尿劑緩解症狀但不降死亡率。",mnem:"HFrEF四柱ABMS：ACEI/β-blocker/MRA/SGLT2i"},
+      {rank:38,os:"外科決策樹",osIdx:7,topic:"STEMI的黃金治療時間窗口",freq:90,opts:["溶栓必須在1小時內；PCI在24小時","PCI（D2B）≤90分鐘；如無PCI能力→溶栓≤30分（D2N），症狀<12小時","PCI在6小時內；溶栓在12小時","症狀出現72小時內都可PCI"],ans:1,exp:"STEMI治療選擇：Primary PCI=首選（Door-to-Balloon≤90分鐘；轉院≤120分鐘）。若無法及時PCI→溶栓（D2N≤30分鐘，症狀≤12小時，禁忌須排除）。每延遲1分鐘=約200萬心肌細胞死亡。溶栓成功後仍需24-48小時內PCI（Pharmaco-invasive strategy）。",mnem:"STEMI D2B≤90分；無PCI→溶栓D2N≤30分"},
+      {rank:39,os:"妊娠時間軸",osIdx:8,topic:"GBS（乙型鏈球菌）篩查與預防",freq:81,opts:["妊娠12週篩查；陽性者全程口服Amoxicillin","妊娠35-37週陰道直腸培養篩查；陽性者分娩時靜脈Penicillin G","孕早期血液篩查；陽性者剖腹產","不需常規篩查"],ans:1,exp:"Group B Streptococcus（GBS/S.agalactiae）：新生兒早發性敗血症/腦膜炎的主要原因。篩查：35-37週陰道直腸拭子培養。預防：GBS陽性、GBS菌尿、前胎GBS感染史→分娩時靜脈Penicillin G（首選，青黴素過敏→Clindamycin或Vancomycin）。",mnem:"GBS：35-37週篩查；陽性→分娩時靜脈Pen G"},
+      {rank:40,os:"發展時間軸",osIdx:9,topic:"新生兒黃疸的生理性vs病理性",freq:83,opts:["出生後12小時內出現=生理性；3-5天出現=病理性","出生後24小時內出現或膽紅素上升>5mg/dL/天=病理性；2-3天出現=生理性","所有黃疸都是病理性，需換血","只有直接膽紅素升高才是病理性"],ans:1,exp:"生理性黃疸：出生後2-3天出現，足月兒峰值<12.9 mg/dL，5-7天消退。病理性黃疸警示：①出生24小時內出現②膽紅素上升>5mg/dL/天③超過正常峰值④持續>2週（足月）/>3週（早產）。原因：溶血（ABO/Rh不合）、G6PD缺乏、敗血症。治療：光照療法→換血。",mnem:"24小時內=病理性黃疸；上升>5/天=病理性"},
+      ...EXAM_DB.top100.slice(0,10).map((q,i)=>({...q,rank:i+41,freq:q.freq-10}))
+    ];
+
+    EXAM_DB.top1000 = [
+      ...EXAM_DB.top100,
+      ...EXAM_DB.top300.slice(0,10),
+      {rank:51,os:"人體地圖",osIdx:0,topic:"脊髓後索vs前外側索的感覺分工",freq:70,opts:["後索=痛覺溫覺；前外側=位置覺振動覺","後索=位置覺/振動覺/精細觸覺（同側上行）；前外側=痛覺/溫覺（對側上行）","兩者都傳遞所有感覺","前索=位置覺；後外側=痛覺"],ans:1,exp:"脊髓感覺路徑：後索（Dorsal column）=位置覺/振動覺/精細觸覺，同側上行至延腦交叉。前外側索（Spinothalamic）=痛覺/溫覺，進入脊髓1-2節後交叉對側上行。臨床：Brown-Séquard症候群（半切）=同側後索+運動損傷；對側痛溫覺消失。",mnem:"後索=位振精同側；前外側=痛溫對側"},
+      {rank:52,os:"神經網路",osIdx:10,topic:"帕金森病的神經病理與治療",freq:71,opts:["基底核多巴胺↑；治療：DA拮抗劑","黑質紋狀體多巴胺↓（路易小體）；治療：Levodopa/Carbidopa","小腦萎縮；治療：類固醇","額葉退化；治療：SSRI"],ans:1,exp:"帕金森：黑質（Substantia nigra）多巴胺神經元退化（路易小體=α-synuclein）→紋狀體DA↓→基底核輸出↑→運動抑制。症狀4R：Rest tremor（靜止性震顫）/Rigidity（齒輪式）/bradykinesia（動作遲緩）/postural Reflex↓。治療：Levodopa+Carbidopa（金標準）。",mnem:"帕金森=黑質DA↓；4R：Rest tremor/Rigidity/Bradykinesia/Reflex↓"},
+      {rank:53,os:"風險矩陣",osIdx:11,topic:"CHA2DS2-VASc評分與抗凝適應症",freq:74,opts:["分數≥1（男）或≥2（女）=考慮抗凝；分數≥2（男）或≥3（女）=強烈建議","任何AF都需要抗凝","只有永久性AF需要抗凝","評分>5分才需要抗凝"],ans:1,exp:"CHA2DS2-VASc：C=CHF(1)/H=HTN(1)/A=Age≥75(2)/D=DM(1)/S=Stroke史(2)/V=Vascular疾病(1)/A=Age65-74(1)/Sc=Sex female(1)。男性≥2分、女性≥3分=強烈建議口服抗凝（DOAC首選）。男1/女2=考慮抗凝。HAS-BLED評估出血風險（≥3=高風險）。",mnem:"CHA2DS2-VASc≥2男/≥3女=抗凝；DOAC首選"}
+    ];
+
+    // 歷屆考題（按年份）
+    const PAST_EXAM_DB = {
+      "2023": [
+        {no:"112-1",os:"代謝地圖",osIdx:2,topic:"缺乏維生素B1的酵素",freq:88,
+         opts:["HMG-CoA還原酶","丙酮酸去氫酶（PDH）、α-KG去氫酶、轉酮醇酶","乙醯CoA羧化酶","蘋果酸去氫酶"],
+         ans:1,exp:"B1（Thiamine）=TPP輔因子。缺乏影響三個酵素：PDH（丙酮酸→乙醯CoA）、α-KG去氫酶（TCA循環）、轉酮醇酶（HMP shunt）。臨床：Wernicke（眼肌麻痹+共濟失調+意識混亂）、Beriberi（心衰竭+周邊神經炎）。急性酒精中毒急診必須先給B1再給葡萄糖。",
+         mnem:"B1三酵素PAT：PDH/α-KG DH/轉Ketolase"},
+        {no:"112-2",os:"受體地圖",osIdx:4,topic:"Carvedilol的受體作用",freq:85,
+         opts:["選擇性β1拮抗劑","非選擇性β（β1+β2）＋α1拮抗劑","純α1激動劑","選擇性β2激動劑"],
+         ans:1,exp:"Carvedilol=第三代β-blocker：非選擇性β1β2拮抗＋α1拮抗。α1拮抗→血管擴張→降後負荷；β拮抗→逆轉心臟重塑/降猝死。HFrEF最佳β-blocker選擇（另有Metoprolol succinate和Bisoprolol）。禁忌：哮喘、嚴重心搏過慢、急性失代償心衰竭。",
+         mnem:"Carvedilol=Care（α+β都照顧）=HFrEF最佳"},
+        {no:"112-3",os:"免疫軍隊",osIdx:5,topic:"SLE最特異的抗體",freq:87,
+         opts:["ANA","抗dsDNA抗體","RF","抗CCP"],
+         ans:1,exp:"SLE抗體：ANA（最敏感，>95%陽性，但非特異）→抗dsDNA（最特異，70%，與疾病活動度相關，追蹤指標）→抗Sm（25%，也高特異）。補體C3/C4↓（IC消耗）。鑑別：RA=RF+抗CCP；硬皮症=抗SCL70（擴散型）/抗著絲點（CREST）。",
+         mnem:"SLE最特異=抗dsDNA；ANA最敏感但不特異"},
+        {no:"112-4",os:"外科決策樹",osIdx:7,topic:"急性膽囊炎的黃金手術時機",freq:82,
+         opts:["症狀發作後2週以上才手術","症狀發作72小時內（早期）腹腔鏡膽囊切除術","保守治療6週後擇期手術","只有出現膽囊穿孔才手術"],
+         ans:1,exp:"急性膽囊炎：早期腹腔鏡膽囊切除術（72小時內）=目前標準治療，優於延遲手術（降低住院天數、再次住院率）。老高危患者（心肺功能差）→先保守（抗生素、禁食）→穩定後擇期手術或內視鏡引流（PTGBD）。Murphy sign=RUQ按壓時吸氣停止=急性膽囊炎特徵。",
+         mnem:"急性膽囊炎=72小時內腹腔鏡切除最佳"},
+      ],
+      "2022": [
+        {no:"111-1",os:"穩態流程圖",osIdx:1,topic:"代謝性酸中毒的代償公式",freq:86,
+         opts:["PaCO2=HCO3×2+8","PaCO2預期值=1.5×HCO3+8（±2）（Winter公式）","PaCO2=HCO3×0.5","PaCO2預期值=HCO3+10"],
+         ans:1,exp:"代謝性酸中毒的呼吸代償：PaCO2預期值=1.5×[HCO3-]+8（±2）（Winter公式）。如HCO3=15，預期PaCO2=1.5×15+8=30.5±2。實際PaCO2=預期→單純代謝酸；高於預期→合併呼吸酸；低於預期→合併呼吸鹼。",
+         mnem:"Winter公式：PaCO2=1.5×HCO3+8±2"},
+        {no:"111-2",os:"損傷地圖",osIdx:3,topic:"Reed-Sternberg cell的免疫標記",freq:83,
+         opts:["CD20+、TdT+","CD15+、CD30+（CD20陰性）","CD3+、CD8+","CD19+、IgM+"],
+         ans:1,exp:"Reed-Sternberg cell（霍奇金淋巴瘤）：大型雙核「貓頭鷹眼」細胞。免疫標記：CD15+、CD30+，CD20陰性（異常，B細胞來源但不表現B細胞標誌）。與NHL鑑別：NHL B細胞=CD20+（Rituximab靶點）。好發：15-35歲雙峰；治療：ABVD化療±放療。",
+         mnem:"RS cell=CD15+CD30+（CD20陰）；貓頭鷹眼"},
+        {no:"111-3",os:"代謝地圖",osIdx:2,topic:"CN-（氰化物）中毒的解毒劑",freq:80,
+         opts:["Naloxone","Hydroxocobalamin（維B12衍生物）+Sodium thiosulfate","Atropine+Pralidoxime","Flumazenil"],
+         ans:1,exp:"氰化物（CN-）中毒：抑制Complex IV（Cytochrome c oxidase）→ETC停止→細胞無法利用O2→組織缺氧（靜脈血O2正常）→乳酸酸中毒。解毒：Hydroxocobalamin（與CN-結合→Cyanocobalamin排出）+ Sodium thiosulfate（提供硫）。Cherry red skin（靜脈血氧高）、Smoke inhalation（火災）。",
+         mnem:"CN毒=Complex IV阻斷；解毒：Hydroxocobalamin+Thiosulfate"},
+        {no:"111-4",os:"風險矩陣",osIdx:11,topic:"Virchow三聯症與DVT",freq:79,
+         opts:["高血壓+高血脂+吸菸","靜脈停滯+高凝狀態+內皮損傷","貧血+血小板減少+低白蛋白","高血糖+高血鉀+低血鈉"],
+         ans:1,exp:"Virchow三聯症=DVT/血栓形成的三大要素：①靜脈停滯（長途臥床、手術後、下肢癱瘓）②高凝狀態（Factor V Leiden、蛋白C/S缺乏、妊娠、惡性腫瘤、抗磷脂抗體症候群）③內皮損傷（外傷、手術、感染）。風險最高：骨科手術（全膝/髖關節置換）、脊髓損傷。",
+         mnem:"Virchow：停滯+高凝+內皮損傷=DVT三角"},
+      ],
+      "2021": [
+        {no:"110-1",os:"受體地圖",osIdx:4,topic:"Morphine的副作用組合",freq:84,
+         opts:["散瞳+腹瀉+高血壓","縮瞳+便秘+呼吸抑制+低血壓（μ受體全效應）","血小板減少+肝毒性","支氣管收縮+心跳加快"],
+         ans:1,exp:"Morphine（μ阿片受體激動劑）副作用：縮瞳（Pinpoint pupils，頂蓋前核μ受體）、便秘（腸道μ受體→蠕動↓，不耐受不發展）、呼吸抑制（最危險，延腦呼吸中樞μ受體）、低血壓（組織胺釋放+靜脈擴張）、欣快感→依賴。解毒劑：Naloxone（競爭性μ拮抗）。",
+         mnem:"Morphine副作用：縮瞳/便秘/呼吸抑制/低血壓"},
+        {no:"110-2",os:"疾病生命史",osIdx:6,topic:"DM視網膜病變的治療",freq:81,
+         opts:["口服類固醇","雷射光凝固術（NPDR進展期/PDR）或玻璃體腔注射抗VEGF","只需控制血糖無需其他治療","ACEI保護視網膜"],
+         ans:1,exp:"DM視網膜病變：NPDR（非增殖性）=微動脈瘤/硬性滲出/棉絮斑/靜脈串珠；PDR（增殖性）=新生血管（VEGF↑）→玻璃體出血→牽引性視網膜剝離→失明。治療：NPDR輕中度=觀察+控糖；NPDR嚴重/PDR=雷射光凝固術（全視網膜光凝）；黃斑水腫=玻璃體腔注射抗VEGF（Ranibizumab）。",
+         mnem:"PDR=新生血管；治療：雷射光凝或抗VEGF注射"},
+        {no:"110-3",os:"人體地圖",osIdx:0,topic:"冠狀動脈分布與MI定位",freq:86,
+         opts:["LAD=下壁MI；RCA=前壁MI","LAD=前壁（V1-V4）；LCx=側壁（I/aVL）；RCA=下壁（II/III/aVF）","所有MI都在V1-V6","LCx=下壁；RCA=前壁"],
+         ans:1,exp:"冠狀動脈定位：LAD（左前降）=前壁（V1-V4）、間隔（V1-V2）→最大範圍MI最嚴重。LCx（左迴旋）=側壁（I、aVL、V5-V6）。RCA（右冠）=下壁（II、III、aVF），右優勢時也管後壁和右心室（V3R/V4R ST↑）。右心室梗塞：V1 ST↑，禁硝酸鹽（→前負荷↓→BP↓）。",
+         mnem:"LAD前壁V1-V4；LCx側壁；RCA下壁II/III/aVF"},
+        {no:"110-4",os:"神經網路",osIdx:10,topic:"SSRI的主要副作用",freq:80,
+         opts:["骨髓抑制+肝毒性","性功能障礙+失眠+噁心+血清素症候群（與MAOI合用禁忌）","顆粒性白血球缺乏症","牙齦增生+多毛症"],
+         ans:1,exp:"SSRI（選擇性血清素再回收抑制劑，如Fluoxetine/Sertraline/Escitalopram）副作用：性功能障礙（最常見，難耐受原因）、失眠/焦慮（初期）、噁心（初期）、出血風險↑（血小板5-HT↓）。最危險：血清素症候群（與MAOI、Tramadol、Linezolid合用）=高熱/顫抖/意識改變。",
+         mnem:"SSRI副作用：性功能↓/失眠/噁心；禁合MAOI（血清素症候群）"},
+      ]
+    };
+
+    // ══ 模擬考題庫（30題混合OS） ══
+    const MOCK_EXAM_QS = [
+      EXAM_DB.top100[0], EXAM_DB.top100[3], EXAM_DB.top100[6],
+      EXAM_DB.top100[9], EXAM_DB.top100[12], EXAM_DB.top100[15],
+      EXAM_DB.top100[18], EXAM_DB.top100[21], EXAM_DB.top100[24],
+      EXAM_DB.top100[27],
+      EXAM_DB.top300[0], EXAM_DB.top300[1], EXAM_DB.top300[2],
+      EXAM_DB.top300[3], EXAM_DB.top300[4], EXAM_DB.top300[5],
+      EXAM_DB.top300[6], EXAM_DB.top300[7], EXAM_DB.top300[8],
+      EXAM_DB.top300[9],
+      PAST_EXAM_DB["2023"][0], PAST_EXAM_DB["2023"][1],
+      PAST_EXAM_DB["2022"][0], PAST_EXAM_DB["2022"][1],
+      PAST_EXAM_DB["2021"][0], PAST_EXAM_DB["2021"][1],
+      EXAM_DB.top1000[10], EXAM_DB.top1000[11], EXAM_DB.top1000[12],
+      EXAM_DB.top100[29]
+    ];
+
+    // ══ 國考模式狀態 ══
+    let examState = {
+      tab: 'top100',
+      osFilter: 'all',
+      answered: {},
+      mockStarted: false,
+      mockTimer: null,
+      mockSeconds: 30 * 90,
+      pastYear: '2023'
+    };
+
+    // ══ OS filter pills ══
+    function initOsFilter() {
+      const pills = document.getElementById('osFilterPills');
+      if (!pills) return;
+      const osNames = ['全部', ...maps.map(m => m.title.replace(' OS',''))];
+      pills.innerHTML = osNames.map((n,i) => 
+        `<button class="os-fpill ${i===0?'active':''}" onclick="filterOS(this,'${i===0?'all':i-1}')">${n}</button>`
+      ).join('');
+    }
+
+    function filterOS(el, osIdx) {
+      document.querySelectorAll('.os-fpill').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      examState.osFilter = osIdx;
+      renderExamPanel(examState.tab);
+    }
+
+    // ══ Tab switching ══
+    function switchExamTab(tab, el) {
+      document.querySelectorAll('.emt').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      document.querySelectorAll('.exam-panel').forEach(p => p.style.display = 'none');
+      document.getElementById('exam-panel-' + tab).style.display = 'block';
+      examState.tab = tab;
+      examState.answered = {};
+      renderExamPanel(tab);
+    }
+
+    function renderExamPanel(tab) {
+      if (tab === 'mock') { renderMock(); return; }
+      if (tab === 'past') { renderPast(); return; }
+      const panel = document.getElementById('exam-panel-' + tab);
+      if (!panel) return;
+
+      let qs = EXAM_DB[tab] || [];
+      if (examState.osFilter !== 'all') {
+        qs = qs.filter(q => q.osIdx == examState.osFilter);
+      }
+      if (!qs.length) { panel.innerHTML = '<p style="color:#9fb0c8;padding:20px">此 OS 在此層級暫無題目</p>'; return; }
+
+      const scoreHTML = `<div class="score-bar">
+        <div><div class="score-num" id="sc-${tab}">0</div><div style="font-size:11px;color:#9fb0c8">得分</div></div>
+        <div class="score-prog"><div class="score-fill" id="spfill-${tab}" style="width:0%"></div></div>
+        <div style="font-size:13px;color:#26364f;font-weight:700">共 ${qs.length} 題</div>
+        <button class="btn-submit" onclick="submitExamTab('${tab}')">提交計分</button>
+      </div>`;
+
+      const rankLabel = tab === 'top100' ? 'hot' : tab === 'top300' ? 'gold' : 'blue';
+
+      panel.innerHTML = scoreHTML + qs.map((q, i) => `
+        <details class="qcard" id="qc-${tab}-${i}">
+          <summary class="qcard-head">
+            <span class="qcard-rank ${rankLabel}">#${q.rank}</span>
+            <span class="qcard-os">${q.os}</span>
+            <span class="qcard-title">${q.topic}</span>
+            <span class="qcard-freq">出現率 ${q.freq}%</span>
+            <span id="qst-${tab}-${i}" style="font-size:11px;font-weight:800;min-width:28px;text-align:right"></span>
+            <span class="qcard-arr">&#9658;</span>
+          </summary>
+          <div class="qcard-body">
+            <div class="q-opts">${q.opts.map((o,oi) =>
+              `<div class="q-opt" onclick="ansQ('${tab}',${i},${oi},${q.ans},this)">
+                <div class="q-opt-key">${['A','B','C','D'][oi]}</div>${o}
+              </div>`).join('')}
+            </div>
+            <div class="q-explain" id="qexp-${tab}-${i}">
+              <span class="exp-os">📍 ${q.os} · 出現率 ${q.freq}%</span>
+              ${q.exp}
+              <div class="exp-mnem">🎯 ${q.mnem}</div>
+            </div>
+          </div>
+        </details>`).join('');
+    }
+
+    function ansQ(tab, idx, chosen, correct, el) {
+      const opts = el.parentElement.querySelectorAll('.q-opt');
+      if ([...opts].some(o => o.classList.contains('correct'))) return;
+      opts.forEach((o,i) => {
+        if (i === correct) o.classList.add('correct');
+        else if (i === chosen && chosen !== correct) o.classList.add('wrong');
+      });
+      document.getElementById(`qexp-${tab}-${idx}`).classList.add('show');
+      const ok = chosen === correct;
+      const st = document.getElementById(`qst-${tab}-${idx}`);
+      if (st) { st.textContent = ok ? '✅' : '❌'; }
+      examState.answered[`${tab}-${idx}`] = ok;
+      updateScore(tab);
+    }
+
+    function updateScore(tab) {
+      const keys = Object.keys(examState.answered).filter(k => k.startsWith(tab));
+      const correct = keys.filter(k => examState.answered[k]).length;
+      const sc = document.getElementById(`sc-${tab}`);
+      const fill = document.getElementById(`spfill-${tab}`);
+      if (sc) sc.textContent = correct;
+      if (fill) {
+        const total = (EXAM_DB[tab] || []).length;
+        fill.style.width = total ? (correct / total * 100) + '%' : '0%';
+      }
+    }
+
+    function submitExamTab(tab) {
+      const qs = EXAM_DB[tab] || [];
+      const total = qs.length;
+      const done = Object.keys(examState.answered).filter(k=>k.startsWith(tab)).length;
+      const correct = Object.keys(examState.answered).filter(k=>k.startsWith(tab)&&examState.answered[k]).length;
+      alert(`📊 結果：${correct}/${done} 題正確（共${total}題）\n正確率：${done?Math.round(correct/done*100):0}%`);
+    }
+
+    // ══ Mock exam ══
+    let mockAnswers = {};
+    function renderMock() {
+      const panel = document.getElementById('exam-panel-mock');
+      mockAnswers = {};
+      examState.mockSeconds = MOCK_EXAM_QS.length * 90;
+      panel.innerHTML = `
+        <div class="mock-header">
+          <div>
+            <strong style="font-size:15px">📝 模擬考 · ${MOCK_EXAM_QS.length} 題混合 OS</strong>
+            <div style="font-size:12px;color:#9fb0c8;margin-top:3px">每題限時 90 秒 · 12個OS全覆蓋</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="mock-timer" id="mock-timer">--:--</div>
+            <button class="btn-start" onclick="startMock()">▶ 開始計時</button>
+            <button class="btn-submit" onclick="submitMock()">提交計分</button>
+          </div>
+        </div>
+        <div class="score-bar">
+          <div><div class="score-num" id="sc-mock">0</div><div style="font-size:11px;color:#9fb0c8">得分</div></div>
+          <div class="score-prog"><div class="score-fill" id="spfill-mock" style="width:0%"></div></div>
+          <div style="font-size:13px;color:#26364f;font-weight:700">共 ${MOCK_EXAM_QS.length} 題</div>
+        </div>
+        ${MOCK_EXAM_QS.map((q,i) => `
+        <details class="qcard" id="qc-mock-${i}">
+          <summary class="qcard-head">
+            <span class="qcard-rank hot">${i+1}</span>
+            <span class="qcard-os">${q.os}</span>
+            <span class="qcard-title">${q.topic}</span>
+            <span id="qst-mock-${i}" style="font-size:11px;font-weight:800;min-width:28px;text-align:right"></span>
+            <span class="qcard-arr">&#9658;</span>
+          </summary>
+          <div class="qcard-body">
+            <div class="q-opts">${q.opts.map((o,oi) =>
+              `<div class="q-opt" onclick="ansMock(${i},${oi},${q.ans},this)">
+                <div class="q-opt-key">${['A','B','C','D'][oi]}</div>${o}
+              </div>`).join('')}
+            </div>
+            <div class="q-explain" id="qexp-mock-${i}">
+              <span class="exp-os">📍 ${q.os} · 出現率 ${q.freq}%</span>
+              ${q.exp}
+              <div class="exp-mnem">🎯 ${q.mnem}</div>
+            </div>
+          </div>
+        </details>`).join('')}`;
+    }
+
+    function startMock() {
+      if (examState.mockTimer) clearInterval(examState.mockTimer);
+      examState.mockTimer = setInterval(() => {
+        examState.mockSeconds--;
+        const m = Math.floor(examState.mockSeconds / 60).toString().padStart(2,'0');
+        const s = (examState.mockSeconds % 60).toString().padStart(2,'0');
+        const el = document.getElementById('mock-timer');
+        if (el) el.textContent = m + ':' + s;
+        if (el) el.style.color = examState.mockSeconds < 300 ? '#dc2626' : '#b91c1c';
+        if (examState.mockSeconds <= 0) { clearInterval(examState.mockTimer); submitMock(); }
+      }, 1000);
+    }
+
+    function ansMock(idx, chosen, correct, el) {
+      const opts = el.parentElement.querySelectorAll('.q-opt');
+      if ([...opts].some(o => o.classList.contains('correct'))) return;
+      opts.forEach((o,i) => {
+        if (i === correct) o.classList.add('correct');
+        else if (i === chosen && chosen !== correct) o.classList.add('wrong');
+      });
+      document.getElementById(`qexp-mock-${idx}`).classList.add('show');
+      const ok = chosen === correct;
+      const st = document.getElementById(`qst-mock-${idx}`);
+      if (st) st.textContent = ok ? '✅' : '❌';
+      mockAnswers[idx] = ok;
+      const correct_count = Object.values(mockAnswers).filter(Boolean).length;
+      const sc = document.getElementById('sc-mock');
+      const fill = document.getElementById('spfill-mock');
+      if (sc) sc.textContent = correct_count;
+      if (fill) fill.style.width = (correct_count / MOCK_EXAM_QS.length * 100) + '%';
+    }
+
+    function submitMock() {
+      if (examState.mockTimer) clearInterval(examState.mockTimer);
+      const done = Object.keys(mockAnswers).length;
+      const correct = Object.values(mockAnswers).filter(Boolean).length;
+      const pct = done ? Math.round(correct/done*100) : 0;
+      const el = document.getElementById('mock-timer');
+      if (el) el.textContent = '完成';
+      alert(`📊 模擬考結果\n得分：${correct}/${MOCK_EXAM_QS.length}\n已答：${done}/${MOCK_EXAM_QS.length}\n正確率：${pct}%\n${pct>=75?'🎉 達到及格標準！':'📚 繼續加油！建議複習錯題OS節點'}`);
+    }
+
+    // ══ Past exam ══
+    function renderPast() {
+      const panel = document.getElementById('exam-panel-past');
+      const years = Object.keys(PAST_EXAM_DB).sort((a,b)=>b-a);
+      const qs = PAST_EXAM_DB[examState.pastYear] || [];
+
+      const yearTabs = `<div class="past-year-tabs">${years.map(y =>
+        `<button class="pyt ${y===examState.pastYear?'active':''}" onclick="switchPastYear('${y}',this)">${y} 年度</button>`
+      ).join('')}</div>`;
+
+      panel.innerHTML = yearTabs + qs.map((q,i) => `
+        <details class="qcard" id="qc-past-${i}">
+          <summary class="qcard-head">
+            <span class="qcard-rank blue">${q.no}</span>
+            <span class="qcard-os">${q.os}</span>
+            <span class="qcard-title">${q.topic}</span>
+            <span id="qst-past-${i}" style="font-size:11px;font-weight:800;min-width:28px;text-align:right"></span>
+            <span class="qcard-arr">&#9658;</span>
+          </summary>
+          <div class="qcard-body">
+            <div class="q-opts">${q.opts.map((o,oi) =>
+              `<div class="q-opt" onclick="ansPast(${i},${oi},${q.ans},this)">
+                <div class="q-opt-key">${['A','B','C','D'][oi]}</div>${o}
+              </div>`).join('')}
+            </div>
+            <div class="q-explain" id="qexp-past-${i}">
+              <span class="exp-os">📍 ${q.os} · ${q.no}</span>
+              ${q.exp}
+              <div class="exp-mnem">🎯 ${q.mnem}</div>
+            </div>
+          </div>
+        </details>`).join('');
+    }
+
+    function switchPastYear(year, el) {
+      examState.pastYear = year;
+      renderPast();
+    }
+
+    function ansPast(idx, chosen, correct, el) {
+      const opts = el.parentElement.querySelectorAll('.q-opt');
+      if ([...opts].some(o => o.classList.contains('correct'))) return;
+      opts.forEach((o,i) => {
+        if (i === correct) o.classList.add('correct');
+        else if (i === chosen && chosen !== correct) o.classList.add('wrong');
+      });
+      document.getElementById(`qexp-past-${idx}`).classList.add('show');
+      const st = document.getElementById(`qst-past-${idx}`);
+      if (st) st.textContent = chosen === correct ? '✅' : '❌';
+    }
+
+    // ══ Init exam mode ══
+    function initExamMode() {
+      initOsFilter();
+      renderExamPanel('top100');
+    }
+
+
+    initExamMode();
+</script>
+</body>
+</html>
